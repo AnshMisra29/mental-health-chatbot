@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert History | MindCare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-brain" style="margin-right: 10px;"></i> MindCare
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+                <li><a href="chat.html" class="nav-link"><i class="fa-solid fa-comments"></i> Chat</a></li>
+                <li><a href="#" class="nav-link"><i class="fa-solid fa-chart-line"></i> Analysis</a></li>
+                <li><a href="#" class="nav-link active"><i class="fa-solid fa-bell"></i> Alerts</a></li>
+            </ul>
+            <a href="login.html" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>Alert History</h1>
+                    <p style="color: var(--text-secondary);">Track past mental health notifications</p>
+                </div>
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=Alex+Doe&background=4a90e2&color=fff" alt="Profile"
+                        class="avatar">
+                </div>
+            </header>
+
+            <div class="card">
+                <div class="alert-table-container">
+                    <table class="alert-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Alert Type</th>
+                                <th>Severity</th>
+                                <th>Action Taken</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Oct 24, 2023</td>
+                                <td>High Anxiety Detected</td>
+                                <td><span class="badge badge-medium">Medium</span></td>
+                                <td>Breathing Exercise</td>
+                            </tr>
+                            <tr>
+                                <td>Oct 18, 2023</td>
+                                <td>Depressive Symptoms</td>
+                                <td><span class="badge badge-high">High</span></td>
+                                <td>Doctor Recomm.</td>
+                            </tr>
+                            <tr>
+                                <td>Oct 10, 2023</td>
+                                <td>Slight Stress</td>
+                                <td><span class="badge badge-low">Low</span></td>
+                                <td>Chat Session</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</body>
+
+</html>
