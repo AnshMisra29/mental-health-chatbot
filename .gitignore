@@ -22,7 +22,6 @@ instance/
 *.h5
 *.pt
 *.onnx
-saved_models/
 
 # Datasets — too large for git
 datasets/
