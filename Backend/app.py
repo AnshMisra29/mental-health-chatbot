@@ -24,14 +24,13 @@ from database import models
 
 # ── Register Blueprints ───────────────────────────────────────────────────────
 from auth import auth_bp
-# from chatbot.routes import chatbot_bp
-# from alerts.routes import alerts_bp
-# from dashboard.routes import dashboard_bp
+from alerts import alerts_bp
+from dashboard import dashboard_bp
 
-app.register_blueprint(auth_bp, url_prefix="/api/auth")
+app.register_blueprint(auth_bp,      url_prefix="/api/auth")
+app.register_blueprint(alerts_bp,    url_prefix="/api/alerts")
+app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 # app.register_blueprint(chatbot_bp, url_prefix="/api/chat")
-# app.register_blueprint(alerts_bp, url_prefix="/api/alerts")
-# app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 
 # ── Health check ──────────────────────────────────────────────────────────────
 @app.route('/api/health')
