@@ -1,0 +1,9 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Flask instance folder
+instance/
+
+# SQLite database — never push this to GitHub
+mental_health.db
