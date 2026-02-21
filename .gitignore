@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Flask instance & database
+instance/
+*.db
+
+# Environment secrets — NEVER commit this
+.env
+
+# ML model binaries
+*.pkl
+*.h5
+*.pt
+*.onnx
+saved_models/
+
+# Datasets — too large for git
+datasets/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+notebooks/
+
+# IDE
+.vscode/
+.idea/
