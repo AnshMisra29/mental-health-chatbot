@@ -74,21 +74,19 @@ const AuthPage = () => {
           <div className="flex p-1 bg-slate-950 rounded-2xl mb-8 border border-slate-800">
             <button
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
-                isLogin
+              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${isLogin
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                   : "text-slate-500 hover:text-white"
-              }`}
+                }`}
             >
               Login
             </button>
             <button
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
-                !isLogin
+              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${!isLogin
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                   : "text-slate-500 hover:text-white"
-              }`}
+                }`}
             >
               Register
             </button>
