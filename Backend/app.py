@@ -27,10 +27,11 @@ from auth import auth_bp
 from alerts import alerts_bp
 from dashboard import dashboard_bp
 
+from chatbot.routes import chatbot_bp
 app.register_blueprint(auth_bp,      url_prefix="/api/auth")
 app.register_blueprint(alerts_bp,    url_prefix="/api/alerts")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
-# app.register_blueprint(chatbot_bp, url_prefix="/api/chat")
+app.register_blueprint(chatbot_bp,   url_prefix="/api/chat")
 
 # ── Load ML Model ─────────────────────────────────────────────────────────────
 from ml_engine.inference.model_loader import load_model

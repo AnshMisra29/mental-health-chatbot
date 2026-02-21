@@ -27,7 +27,7 @@ const AuthenticatedLayout = ({ children }) => {
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutIcon, path: "/dashboard" },
-    { name: "Healo Chat", icon: MessageCircle, path: "/chat" },
+    { name: "Sia Chat", icon: MessageCircle, path: "/chat" },
     { name: "Community", icon: Users, path: "/community" },
     { name: "Resources", icon: BookOpen, path: "/community" },
     { name: "Mood Tracker", icon: BarChart2, path: "/dashboard" },
@@ -44,7 +44,7 @@ const AuthenticatedLayout = ({ children }) => {
       case "/help":
         return "Support center";
       default:
-        return "Healo";
+        return "Sia";
     }
   };
 
@@ -52,9 +52,8 @@ const AuthenticatedLayout = ({ children }) => {
     <div className="flex h-screen bg-slate-950 overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex flex-col h-full">
           <div className="p-8 flex items-center justify-between">
@@ -86,11 +85,10 @@ const AuthenticatedLayout = ({ children }) => {
                   key={item.name}
                   to={item.path}
                   onClick={() => dispatch(setSidebarOpen(false))}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 active:scale-95 ${
-                    isActive
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 active:scale-95 ${isActive
                       ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20"
                       : "text-slate-400 hover:text-white hover:bg-slate-800"
-                  }`}
+                    }`}
                 >
                   <item.icon
                     className={`w-5 h-5 ${isActive ? "text-indigo-400" : "text-slate-400"}`}
@@ -189,7 +187,7 @@ const AuthenticatedLayout = ({ children }) => {
                     onClick={() => dispatch(setSidebarOpen(false))}
                     className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all text-xs font-bold shadow-lg shadow-indigo-500/20 block"
                   >
-                    Talk to Healo
+                    Talk to Sia
                   </Link>
                 </MotionDiv>
               )}
@@ -228,7 +226,7 @@ const AuthenticatedLayout = ({ children }) => {
                 <Heart className="w-6 h-6 text-indigo-500" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">
-                {modal.data?.title || "Healo Support"}
+                {modal.data?.title || "Sia Support"}
               </h2>
               <p className="text-slate-400">
                 {modal.data?.type || "Resources"}

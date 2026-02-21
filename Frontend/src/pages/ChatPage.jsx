@@ -11,7 +11,7 @@ import {
   Paperclip,
 } from "lucide-react";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
-import { addMessage, setTyping } from "../features/chat/chatSlice";
+import { addMessage, setTyping, sendMessage } from "../features/chat/chatSlice";
 
 const MotionDiv = motion.div;
 
@@ -29,13 +29,14 @@ const ChatPage = () => {
     }
   }, [messages, isTyping]);
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    const messageText = input.trim();
+    if (!messageText) return;
 
     const userMessage = {
-      id: `u-${msgCounter.current++}`,
-      text: input,
+      id: `u-${Date.now()}`,
+      text: messageText,
       sender: "user",
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
@@ -45,33 +46,9 @@ const ChatPage = () => {
 
     dispatch(addMessage(userMessage));
     setInput("");
-    dispatch(setTyping(true));
 
-    // Simulate AI Response
-    setTimeout(() => {
-      const aiMessage = {
-        id: `a-${msgCounter.current++}`,
-        text: getAIResponse(input),
-        sender: "ai",
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-      dispatch(setTyping(false));
-      dispatch(addMessage(aiMessage));
-    }, 2000);
-  };
-
-  const getAIResponse = (text) => {
-    const lowerText = text.toLowerCase();
-    if (lowerText.includes("anxiety") || lowerText.includes("anxious")) {
-      return "I hear that you're feeling anxious. That's a very human experience, and you're not alone. Let's try a simple breathing exercise together, or would you like to talk more about what's on your mind?";
-    }
-    if (lowerText.includes("stress") || lowerText.includes("tired")) {
-      return "It sounds like you've been carrying a lot lately. Remember to be kind to yourself. What's one thing you could do today that's purely for your own comfort?";
-    }
-    return "Thank you for sharing that with me. I'm here to listen and support you. How does that make you feel?";
+    // Call real API
+    dispatch(sendMessage({ message: messageText }));
   };
 
   const quickReplies = [
@@ -94,11 +71,11 @@ const ChatPage = () => {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-white">Healo AI</h2>
+              <h2 className="text-sm font-black text-white">Sia AI</h2>
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] text-emerald-500 font-black uppercase tracking-wider">
-                  Always Online
+                  Sia is Online
                 </span>
               </div>
             </div>
@@ -122,7 +99,7 @@ const ChatPage = () => {
                 Welcome, {user?.name || "Friend"}
               </h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                I'm Healo, your personal AI companion. I'm here to listen,
+                I'm Sia, your personal AI companion. I'm here to listen,
                 support, and help you navigate your journey. What's on your mind
                 today?
               </p>
@@ -152,11 +129,10 @@ const ChatPage = () => {
                 className={`flex gap-4 ${msg.sender === "user" ? "flex-row-reverse text-right" : ""}`}
               >
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 ${
-                    msg.sender === "user"
-                      ? "bg-indigo-500/20 text-indigo-400"
-                      : "bg-slate-800 text-slate-400"
-                  }`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 ${msg.sender === "user"
+                    ? "bg-indigo-500/20 text-indigo-400"
+                    : "bg-slate-800 text-slate-400"
+                    }`}
                 >
                   {msg.sender === "user" ? (
                     <User className="w-4 h-4" />
@@ -166,17 +142,23 @@ const ChatPage = () => {
                 </div>
                 <div className="max-w-[75%] space-y-1">
                   <div
-                    className={`px-5 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                      msg.sender === "user"
-                        ? "bg-indigo-600 text-white rounded-tr-none"
-                        : "bg-slate-900 border border-slate-800 text-slate-300 rounded-tl-none"
-                    }`}
+                    className={`px-5 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.sender === "user"
+                      ? "bg-indigo-600 text-white rounded-tr-none"
+                      : "bg-slate-900 border border-slate-800 text-slate-300 rounded-tl-none"
+                      }`}
                   >
                     {msg.text}
                   </div>
-                  <p className="text-[10px] font-bold text-slate-600 px-1">
-                    {msg.timestamp}
-                  </p>
+                  <div className="flex items-center gap-2 px-1">
+                    <p className="text-[10px] font-bold text-slate-600">
+                      {msg.timestamp}
+                    </p>
+                    {msg.sender === "ai" && msg.emotion && (
+                      <span className="text-[10px] font-black text-indigo-400/60 uppercase tracking-tighter">
+                        • {msg.emotion}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </MotionDiv>
             ))}
@@ -234,7 +216,7 @@ const ChatPage = () => {
             </div>
           </form>
           <p className="text-center text-[10px] text-slate-600 mt-4 font-bold uppercase tracking-widest">
-            Healo AI can make mistakes. Consider checking important info.
+            Sia AI can make mistakes. Consider checking important info.
           </p>
         </div>
       </div>

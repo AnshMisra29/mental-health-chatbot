@@ -36,7 +36,7 @@ const Footer = () => {
             <ul className="space-y-4 text-slate-400 text-sm">
               <li>
                 <Link to="/chat" className="hover:text-white transition-colors">
-                  Healo AI
+                  Sia AI
                 </Link>
               </li>
               <li>

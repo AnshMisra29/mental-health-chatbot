@@ -10,6 +10,13 @@ venv/
 env/
 .venv/
 
+# Node modules & frontend artifacts
+node_modules/
+dist/
+dist-ssr/
+.vite/
+npm-debug.log*
+
 # Flask instance & database
 instance/
 *.db
@@ -25,6 +32,7 @@ instance/
 
 # Datasets — too large for git
 datasets/
+*.csv
 
 # Jupyter checkpoints
 .ipynb_checkpoints/
@@ -33,3 +41,4 @@ notebooks/
 # IDE
 .vscode/
 .idea/
+.DS_Store

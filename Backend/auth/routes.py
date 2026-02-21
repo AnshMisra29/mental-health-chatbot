@@ -32,7 +32,18 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({"message": "User registered successfully", "user_id": user.id}), 201
+    # Generate token for immediate login after registration
+    access_token = create_access_token(identity=str(user.id))
+
+    return jsonify({
+        "message": "User registered successfully",
+        "access_token": access_token,
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email
+        }
+    }), 201
 
 
 # ── POST /api/auth/login ──────────────────────────────────────────────────────

@@ -35,7 +35,7 @@ const CommunityPage = () => {
     {
       type: "Exercises",
       title: "10-Minute Mindfulness Meditation",
-      author: "Healo Guide",
+      author: "Sia Guide",
       readTime: "10 min read",
       color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
       icon: Heart,
@@ -54,7 +54,7 @@ const CommunityPage = () => {
     },
     {
       type: "Stories",
-      title: "My Journey with Healo: A Story of Growth",
+      title: "My Journey with Sia: A Story of Growth",
       author: "Alex J.",
       readTime: "8 min read",
       color: "bg-rose-500/10 text-rose-400 border-rose-500/20",
@@ -192,11 +192,10 @@ const CommunityPage = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${
-                activeTab === tab
+              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                   : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
-              }`}
+                }`}
             >
               {tab}
             </button>
