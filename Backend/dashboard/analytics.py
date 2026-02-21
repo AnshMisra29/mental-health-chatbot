@@ -8,7 +8,7 @@ Swappable: add caching, ML insights, or richer queries here later.
 """
 
 from database.db import db
-from database.models import User, ChatHistory, AlertLog
+from database.models import ChatHistory, AlertLog
 from sqlalchemy import func
 
 
@@ -39,24 +39,11 @@ def get_user_summary(user_id: int) -> dict:
         .scalar() or 0
     )
 
-    medium_alerts = (
-        db.session.query(func.count(AlertLog.id))
-        .filter(AlertLog.user_id == user_id, AlertLog.risk_level == "medium")
-        .scalar() or 0
-    )
-
-    low_alerts = (
-        db.session.query(func.count(AlertLog.id))
-        .filter(AlertLog.user_id == user_id, AlertLog.risk_level == "low")
-        .scalar() or 0
-    )
-
     return {
         "total_chats":    total_chats,
         "total_alerts":   total_alerts,
         "high_alerts":    high_alerts,
-        "medium_alerts":  medium_alerts,
-        "low_alerts":     low_alerts,
+        "none_alerts":    total_alerts - high_alerts, # Derived logic
     }
 
 
@@ -96,7 +83,7 @@ def get_alert_breakdown(user_id: int) -> dict:
         .all()
     )
 
-    breakdown = {"high": 0, "medium": 0, "low": 0}
+    breakdown = {"high": 0, "none": 0}
     for risk_level, count in rows:
         if risk_level in breakdown:
             breakdown[risk_level] = count
@@ -106,16 +93,22 @@ def get_alert_breakdown(user_id: int) -> dict:
 
 def get_emotion_trend(user_id: int) -> list:
     """
-    Emotion trend over time — placeholder for ML integration.
-
-    TODO: once ml_engine is implemented, query ChatHistory emotion
-    labels and return a time-series list for the dashboard chart.
-
-    Expected return format:
-    [
-        {"date": "2026-02-21", "emotion": "sad",     "count": 4},
-        {"date": "2026-02-21", "emotion": "anxious",  "count": 2},
-    ]
+    Emotion trend over time.
+    Queries ChatHistory for emotion labels grouped by date.
     """
-    # TODO: implement once ml_engine.inference is built
-    return []
+    results = (
+        db.session.query(
+            func.date(ChatHistory.timestamp).label("date"),
+            ChatHistory.emotion,
+            func.count(ChatHistory.id).label("count")
+        )
+        .filter(ChatHistory.user_id == user_id)
+        .group_by("date", ChatHistory.emotion)
+        .order_by("date")
+        .all()
+    )
+
+    return [
+        {"date": str(r.date), "emotion": r.emotion, "count": r.count}
+        for r in results
+    ]

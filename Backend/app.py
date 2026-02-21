@@ -32,6 +32,11 @@ app.register_blueprint(alerts_bp,    url_prefix="/api/alerts")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 # app.register_blueprint(chatbot_bp, url_prefix="/api/chat")
 
+# ── Load ML Model ─────────────────────────────────────────────────────────────
+from ml_engine.inference.model_loader import load_model
+# Load model once when Flask starts
+load_model()
+
 # ── Health check ──────────────────────────────────────────────────────────────
 @app.route('/api/health')
 def health():

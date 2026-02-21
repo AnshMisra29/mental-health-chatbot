@@ -5,7 +5,8 @@ flask-cors
 flask-jwt-extended
 werkzeug
 python-dotenv
-scikit-learn
-joblib
 pandas
 numpy
+torch
+transformers
+accelerate
