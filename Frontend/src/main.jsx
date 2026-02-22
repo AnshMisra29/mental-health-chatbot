@@ -6,13 +6,17 @@ import { store } from "./app/store";
 import "./index.css";
 import App from "./App.jsx";
 
+import { ThemeProvider } from "./context/ThemeContext";
+
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </QueryClientProvider>
     </Provider>
   </StrictMode>,

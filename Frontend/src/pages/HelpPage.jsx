@@ -40,11 +40,13 @@ const HelpPage = () => {
       <MotionDiv
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-8 max-w-4xl mx-auto"
+        className="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto w-full"
       >
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-black mb-4">How can we help?</h1>
-          <p className="text-slate-400">
+          <h1 className="text-4xl font-black mb-4 text-foreground">
+            How can we help?
+          </h1>
+          <p className="text-foreground/60">
             Find answers, resources, and support whenever you need it.
           </p>
         </div>
@@ -59,24 +61,24 @@ const HelpPage = () => {
               Crisis Resources
             </h2>
           </div>
-          <p className="text-slate-300 mb-8 leading-relaxed">
+          <p className="text-foreground/70 mb-8 leading-relaxed">
             If you are experiencing a mental health crisis or thinking about
             self-harm, please reach out for help immediately. You are not alone.
           </p>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800">
+            <div className="p-6 rounded-2xl bg-card border border-border">
               <h3 className="font-bold mb-2">National Suicide Lifeline</h3>
-              <p className="text-2xl font-black text-white">988</p>
-              <p className="text-xs text-slate-500 mt-2 italic">
+              <p className="text-2xl font-black text-foreground">988</p>
+              <p className="text-xs text-foreground/50 mt-2 italic">
                 Available 24/7 in English and Spanish
               </p>
             </div>
-            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800">
+            <div className="p-6 rounded-2xl bg-card border border-border">
               <h3 className="font-bold mb-2">Crisis Text Line</h3>
-              <p className="text-2xl font-black text-white">
+              <p className="text-2xl font-black text-foreground">
                 Text HOME to 741741
               </p>
-              <p className="text-xs text-slate-500 mt-2 italic">
+              <p className="text-xs text-foreground/50 mt-2 italic">
                 Free, 24/7 confidential support
               </p>
             </div>
@@ -93,15 +95,15 @@ const HelpPage = () => {
             {faqs.map((faq, i) => (
               <div
                 key={i}
-                className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer group"
+                className="p-6 rounded-2xl bg-card/50 border border-border hover:border-indigo-500/30 transition-all cursor-pointer group"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-white group-hover:text-indigo-400 transition-colors">
+                  <h3 className="font-bold text-foreground group-hover:text-indigo-600 transition-colors">
                     {faq.q}
                   </h3>
-                  <ChevronDown className="w-5 h-5 text-slate-600 group-hover:text-indigo-400 transition-colors" />
+                  <ChevronDown className="w-5 h-5 text-foreground/30 group-hover:text-indigo-600 transition-colors" />
                 </div>
-                <p className="mt-4 text-slate-400 text-sm leading-relaxed hidden group-hover:block animate-in fade-in slide-in-from-top-1">
+                <p className="mt-4 text-foreground/60 text-sm leading-relaxed hidden group-hover:block animate-in fade-in slide-in-from-top-1">
                   {faq.a}
                 </p>
               </div>
@@ -111,8 +113,10 @@ const HelpPage = () => {
 
         {/* Contact */}
         <section className="text-center p-12 rounded-[2.5rem] bg-indigo-600/5 border border-indigo-500/10">
-          <h2 className="text-2xl font-bold mb-4">Still need help?</h2>
-          <p className="text-slate-400 mb-8">
+          <h2 className="text-2xl font-bold mb-4 text-foreground">
+            Still need help?
+          </h2>
+          <p className="text-foreground/60 mb-8">
             Can't find what you're looking for? Our team is here to support you.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -125,7 +129,7 @@ const HelpPage = () => {
                   }),
                 )
               }
-              className="px-6 py-3 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-all flex items-center gap-2 text-sm font-bold"
+              className="px-6 py-3 rounded-xl bg-card border border-border hover:bg-border transition-all flex items-center gap-2 text-sm font-bold text-foreground"
             >
               <Mail className="w-4 h-4 text-indigo-400" />
               Email Support
@@ -139,7 +143,7 @@ const HelpPage = () => {
                   }),
                 )
               }
-              className="px-6 py-3 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-all flex items-center gap-2 text-sm font-bold"
+              className="px-6 py-3 rounded-xl bg-card border border-border hover:bg-border transition-all flex items-center gap-2 text-sm font-bold text-foreground"
             >
               <MessageSquare className="w-4 h-4 text-emerald-400" />
               Live Chat

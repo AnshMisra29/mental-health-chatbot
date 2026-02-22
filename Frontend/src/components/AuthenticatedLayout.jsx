@@ -16,6 +16,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { setSidebarOpen, closeModal } from "../features/ui/uiSlice";
 import { logout } from "../features/auth/authSlice";
+import ThemeToggle from "./ThemeToggle";
 
 const MotionDiv = motion.div;
 
@@ -49,11 +50,12 @@ const AuthenticatedLayout = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-950 overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden transition-colors duration-300">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="flex flex-col h-full">
           <div className="p-8 flex items-center justify-between">
@@ -65,13 +67,13 @@ const AuthenticatedLayout = ({ children }) => {
               <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
                 <Heart className="w-6 h-6 text-white fill-current" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-white">
+              <span className="text-xl font-bold tracking-tight text-foreground">
                 InfiHeal
               </span>
             </Link>
             <button
               onClick={() => dispatch(setSidebarOpen(false))}
-              className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-colors"
+              className="p-2 rounded-xl bg-background border border-border text-foreground/70 hover:text-foreground transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -85,10 +87,11 @@ const AuthenticatedLayout = ({ children }) => {
                   key={item.name}
                   to={item.path}
                   onClick={() => dispatch(setSidebarOpen(false))}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 active:scale-95 ${isActive
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 active:scale-95 ${
+                    isActive
                       ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20"
                       : "text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
+                  }`}
                 >
                   <item.icon
                     className={`w-5 h-5 ${isActive ? "text-indigo-400" : "text-slate-400"}`}
@@ -99,13 +102,13 @@ const AuthenticatedLayout = ({ children }) => {
             })}
           </nav>
 
-          <div className="p-6 border-t border-slate-800">
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800 mb-4">
+          <div className="p-6 border-t border-border">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-background border border-border mb-4">
               <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center font-bold text-indigo-400">
                 {user?.name?.[0] || "U"}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white truncate">
+                <p className="text-sm font-bold text-foreground truncate">
                   {user?.name || "User"}
                 </p>
                 <p className="text-xs text-slate-500 truncate">{user?.email}</p>
@@ -133,7 +136,7 @@ const AuthenticatedLayout = ({ children }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => dispatch(setSidebarOpen(false))}
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
           />
         )}
       </AnimatePresence>
@@ -141,10 +144,10 @@ const AuthenticatedLayout = ({ children }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="h-16 flex items-center justify-between px-8 bg-slate-950/50 backdrop-blur-xl border-b border-slate-900 z-30">
+        <header className="h-16 flex items-center justify-between px-8 bg-background/50 backdrop-blur-xl border-b border-border z-30">
           <div className="flex items-center gap-4 flex-1">
             <button
-              className="p-2 text-slate-400 hover:text-white bg-slate-900/50 rounded-lg border border-slate-800 transition-all hover:border-indigo-500/50"
+              className="p-2 text-foreground/70 hover:text-foreground bg-card rounded-lg border border-border transition-all hover:border-indigo-500/50"
               onClick={() => dispatch(setSidebarOpen(!isSidebarOpen))}
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -167,7 +170,7 @@ const AuthenticatedLayout = ({ children }) => {
               <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em]">
                 {getPageTitle()}
               </span>
-              <h1 className="text-sm font-bold text-white leading-tight">
+              <h1 className="text-sm font-bold text-foreground leading-tight">
                 {location.pathname === "/chat"
                   ? "Empathy & Support"
                   : "Good morning, " + (user?.name?.split(" ")[0] || "User")}
@@ -175,6 +178,7 @@ const AuthenticatedLayout = ({ children }) => {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <AnimatePresence mode="wait">
               {location.pathname !== "/chat" && (
                 <MotionDiv
@@ -185,7 +189,7 @@ const AuthenticatedLayout = ({ children }) => {
                   <Link
                     to="/chat"
                     onClick={() => dispatch(setSidebarOpen(false))}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all text-xs font-bold shadow-lg shadow-indigo-500/20 block"
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all text-xs font-bold shadow-lg shadow-indigo-500/20 block text-white"
                   >
                     Talk to Sia
                   </Link>
@@ -195,7 +199,7 @@ const AuthenticatedLayout = ({ children }) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-slate-950 px-4 md:px-0">
+        <main className="flex-1 flex flex-col min-h-0 bg-background overflow-hidden px-4 md:px-0">
           <AnimatePresence mode="wait">
             <MotionDiv
               key={location.pathname}
@@ -203,6 +207,7 @@ const AuthenticatedLayout = ({ children }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
+              className="flex-1 flex flex-col min-h-0"
             >
               {children}
             </MotionDiv>
@@ -212,11 +217,11 @@ const AuthenticatedLayout = ({ children }) => {
 
       {/* Global Modal Overlay */}
       {modal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-[2.5rem] p-8 relative shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-background/80 backdrop-blur-md">
+          <div className="bg-card border border-border w-full max-w-lg rounded-[2.5rem] p-8 relative shadow-2xl animate-in zoom-in-95 duration-200">
             <button
               onClick={() => dispatch(closeModal())}
-              className="absolute top-6 right-6 p-2 rounded-xl bg-slate-950 text-slate-400 hover:text-white border border-slate-800 transition-colors"
+              className="absolute top-6 right-6 p-2 rounded-xl bg-background text-foreground/70 hover:text-foreground border border-border transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
