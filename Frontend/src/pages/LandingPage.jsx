@@ -1,130 +1,159 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import {
-  Sparkles,
-  Heart,
-  Users,
-  MessageCircle,
-  Shield,
-  Zap,
-  CheckCircle2,
-  Star,
-} from "lucide-react";
-import { motion } from "framer-motion";
+﻿import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Heart,
+  Sparkles,
+  Shield,
+  Zap,
+  ArrowRight,
+  Brain,
+  MessageCircle,
+  Users,
+  LineChart,
+} from "lucide-react";
 
 const MotionDiv = motion.div;
-const MotionH1 = motion.h1;
-const MotionP = motion.p;
+const MotionButton = motion.button;
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+
+  const handleStartJourney = () => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    } else {
+      navigate("/auth");
+    }
+  };
+
+  const handleExploreTools = () => {
+    if (isAuthenticated) {
+      navigate("/community");
+    } else {
+      navigate("/auth");
+    }
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+      transition: { staggerChildren: 0.2 },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+    },
   };
 
   return (
-    <MotionDiv
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="bg-slate-950 min-h-screen selection:bg-indigo-500/30"
-    >
+    <div className="min-h-screen bg-background transition-colors duration-500 overflow-x-hidden selection:bg-cyan-500/15">
       <Navbar />
 
       <main>
         {/* Hero Section */}
-        <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-          {/* Animated background Blobs */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-indigo-600/10 blur-[120px] rounded-full -z-10 animate-pulse" />
-          <div className="absolute -top-20 -right-20 w-80 h-80 bg-emerald-500/5 blur-[80px] rounded-full -z-10" />
+        <section className="relative pt-64 pb-48 overflow-hidden min-h-[90vh] flex items-center">
+          {/* Advanced Decorative Elements */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[140%] h-[1000px] bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent blur-[120px] rounded-full pointer-events-none" />
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
 
-          <MotionDiv
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="max-w-7xl mx-auto px-6 text-center"
-          >
+          <div className="max-w-7xl mx-auto px-8 relative z-10 w-full">
             <MotionDiv
-              variants={itemVariants}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-800 text-indigo-400 text-xs font-semibold mb-8 backdrop-blur-md"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="max-w-5xl"
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Join 50,000+ users on their wellness journey</span>
-            </MotionDiv>
-
-            <MotionH1
-              variants={itemVariants}
-              className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.1] mb-8"
-            >
-              Find your <span className="text-indigo-500">calm</span>{" "}
-              <br className="hidden md:block" /> with AI empathy.
-            </MotionH1>
-
-            <MotionP
-              variants={itemVariants}
-              className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed"
-            >
-              Sia is more than a chatbot. It's an empathetic AI companion
-              trained to support your mental health 24/7. No stigma, no waiting,
-              just help when you need it.
-            </MotionP>
-
-            <MotionDiv
-              variants={itemVariants}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            >
-              <Link
-                to="/auth"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 transition-all font-bold text-lg shadow-xl shadow-indigo-500/25 active:scale-95 hover:-translate-y-1"
+              <motion.div
+                variants={itemVariants}
+                className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-cyan-600/5 border border-cyan-400/20 text-cyan-600 mb-12"
               >
-                Start Chatting Now
-              </Link>
-              <Link
-                to="/community"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-all font-bold text-lg active:scale-95"
+                <Sparkles className="w-4 h-4" />
+                <span className="text-xs font-black uppercase tracking-[0.2em]">
+                  NextGen Mental Health Platform
+                </span>
+              </motion.div>
+
+              <motion.h1
+                variants={itemVariants}
+                className="text-8xl md:text-[9rem] lg:text-[11rem] font-black font-heading tracking-[-0.05em] leading-[0.85] mb-12 text-foreground"
               >
-                Join Community
-              </Link>
+                Heal <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-emerald-600 to-cyan-600 bg-[length:200%_auto] animate-gradient-x">
+                  Different.
+                </span>
+              </motion.h1>
+
+              <motion.p
+                variants={itemVariants}
+                className="text-2xl md:text-3xl font-medium text-foreground/40 max-w-2xl mb-16 leading-relaxed"
+              >
+                Experience the world's most empathetic AI companion for mental
+                wellness. Accessible 24/7, clinical-grade, and entirely private.
+              </motion.p>
+
+              <motion.div
+                variants={itemVariants}
+                className="flex flex-col sm:flex-row gap-6"
+              >
+                <MotionButton
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleStartJourney}
+                  className="px-12 py-6 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-black uppercase tracking-[0.2em] text-xs shadow-[0_20px_40px_-10px_rgba(8,145,178,0.3)] flex items-center justify-center gap-4 group transition-all"
+                >
+                  Start Your Journey
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </MotionButton>
+                <MotionButton
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleExploreTools}
+                  className="px-12 py-6 rounded-[2rem] bg-card border border-border/60 text-foreground/80 font-black uppercase tracking-[0.2em] text-xs shadow-soft hover:shadow-lg flex items-center justify-center gap-4 transition-all"
+                >
+                  Explore CBT Tools
+                </MotionButton>
+              </motion.div>
             </MotionDiv>
-          </MotionDiv>
+          </div>
         </section>
 
         {/* Stats Section */}
-        <section className="py-20 bg-slate-900/30 border-y border-slate-900">
-          <div className="max-w-7xl mx-auto px-6">
+        <section className="py-32 relative border-y border-border/60">
+          <div className="absolute inset-0 bg-card/10 backdrop-blur-3xl" />
+          <div className="max-w-7xl mx-auto px-8 relative z-10">
             <MotionDiv
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-8"
+              className="grid grid-cols-2 md:grid-cols-4 gap-16"
             >
               {[
-                { label: "Users Helped", value: "50K+" },
-                { label: "Conversations", value: "1.2M+" },
-                { label: "Self-Tests Taken", value: "200K+" },
-                { label: "Safe & Secure", value: "100%" },
-              ].map((stat, i) => (
+                { label: "Active Users", value: "85K+" },
+                { label: "AI Chats", value: "2.4M+" },
+                { label: "Self-Tests", value: "350K+" },
+                { label: "Privacy Rate", value: "100%" },
+              ].map((stat) => (
                 <MotionDiv
                   variants={itemVariants}
-                  key={i}
-                  className="text-center"
+                  key={stat.label}
+                  className="group"
                 >
-                  <div className="text-3xl md:text-4xl font-black text-white mb-2">
+                  <div className="text-5xl md:text-6xl font-black font-heading tracking-tighter text-cyan-600 mb-3 group-hover:scale-110 transition-transform duration-500">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-slate-500 uppercase tracking-widest font-bold">
+                  <div className="text-[10px] text-foreground/30 font-black uppercase tracking-[0.3em] group-hover:text-foreground/50 transition-colors">
                     {stat.label}
                   </div>
                 </MotionDiv>
@@ -134,71 +163,59 @@ const LandingPage = () => {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-32">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-20">
-              <h2 className="text-3xl md:text-5xl font-black mb-6">
-                Designed for your wellness.
+        <section id="features" className="py-64 relative overflow-hidden">
+          <div className="absolute -bottom-96 -left-96 w-[800px] h-[800px] bg-cyan-500/5 blur-[160px] rounded-full pointer-events-none" />
+
+          <div className="max-w-7xl mx-auto px-8 relative z-10">
+            <div className="text-center mb-32 max-w-3xl mx-auto">
+              <h2 className="text-6xl md:text-8xl font-black font-heading tracking-tighter mb-10 leading-[0.9]">
+                Designed for your{" "}
+                <span className="text-cyan-600">wellness.</span>
               </h2>
-              <p className="text-slate-400 max-w-xl mx-auto text-lg">
+              <p className="text-foreground/40 text-2xl font-medium leading-relaxed">
                 We've combined clinical psychology with advanced AI to create a
-                platform that truly understands.
+                platform that truly understands your needs.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-12">
               {[
                 {
-                  icon: MessageCircle,
-                  title: "Empathetic Chat",
-                  desc: "Sia uses proven therapeutic techniques to help you navigate your emotions without judgment.",
-                  gradient: "from-indigo-500/20 to-transparent",
+                  title: "Sia AI Companion",
+                  desc: "Proprietary LLM trained on 10,000+ clinical hours to provide empathetic, evidence-based support.",
+                  icon: Brain,
+                  color: "from-cyan-600 to-cyan-400",
                 },
                 {
-                  icon: Shield,
-                  title: "Private & Secure",
-                  desc: "Your data is end-to-end encrypted. We prioritize your privacy above everything else.",
-                  gradient: "from-emerald-500/20 to-transparent",
+                  title: "Clinical Tools",
+                  desc: "Interactive CBT journals, mood trackers, and anxiety assessments developed by therapists.",
+                  icon: LineChart,
+                  color: "from-emerald-600 to-emerald-400",
                 },
                 {
+                  title: "Safe Community",
+                  desc: "Stigma-free zones where users share stories and find support in a moderated environment.",
                   icon: Users,
-                  title: "Peer Community",
-                  author: "Sia Guide",
-                  desc: "Connect with a global community. Share stories, find support, and realize you're not alone.",
-                  gradient: "from-blue-500/20 to-transparent",
+                  color: "from-blue-600 to-blue-400",
                 },
-                {
-                  icon: Zap,
-                  title: "My Journey with Sia: A Story of Growth",
-                  desc: "No appointments needed. Get crisis support and immediate coping strategies in seconds.",
-                  gradient: "from-amber-500/20 to-transparent",
-                },
-                {
-                  icon: Sparkles,
-                  title: "Daily Exercises",
-                  desc: "From mindfulness to mood tracking, get personalized tools based on your needs.",
-                  gradient: "from-pink-500/20 to-transparent",
-                },
-                {
-                  icon: CheckCircle2,
-                  title: "Better Results",
-                  desc: "Regular interaction with Sia is proven to reduce stress and improve emotional clarity.",
-                  gradient: "from-violet-500/20 to-transparent",
-                },
-              ].map((feature, i) => (
+              ].map((feature, idx) => (
                 <MotionDiv
-                  key={i}
-                  whileHover={{ y: -10 }}
-                  className={`p-8 rounded-[2rem] bg-slate-900/50 border border-slate-800 backdrop-blur-sm relative overflow-hidden group`}
+                  key={idx}
+                  variants={itemVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  className="p-12 rounded-[3.5rem] bg-card/40 border border-border/60 backdrop-blur-xl shadow-soft hover:shadow-2xl hover:border-cyan-400/30 transition-all duration-500 group"
                 >
                   <div
-                    className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${feature.gradient}`}
-                  />
-                  <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-7 h-7 text-indigo-400" />
+                    className={`w-16 h-16 rounded-[1.5rem] bg-gradient-to-br ${feature.color} flex items-center justify-center text-white mb-10 shadow-lg group-hover:scale-110 transition-transform duration-500`}
+                  >
+                    <feature.icon className="w-8 h-8" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                  <p className="text-slate-400 leading-relaxed text-sm">
+                  <h3 className="text-3xl font-black font-heading tracking-tight mb-6">
+                    {feature.title}
+                  </h3>
+                  <p className="text-foreground/40 text-lg font-medium leading-relaxed group-hover:text-foreground/60 transition-colors">
                     {feature.desc}
                   </p>
                 </MotionDiv>
@@ -207,65 +224,36 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section className="py-32 bg-indigo-600/5">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
-              <div className="max-w-xl">
-                <h2 className="text-3xl md:text-5xl font-black mb-6 italic">
-                  "Sia changed my life when I had nobody to talk to."
-                </h2>
-                <div className="flex gap-1 text-amber-400 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-current" />
-                  ))}
-                </div>
-                <p className="text-slate-300 font-bold text-xl">
-                  — Sarah M., Early Beta User
-                </p>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center cursor-pointer hover:bg-slate-700 transition-colors">
-                  ←
-                </div>
-                <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center cursor-pointer hover:bg-slate-700 transition-colors">
-                  →
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
-        <section className="py-32 max-w-7xl mx-auto px-6">
-          <div className="relative p-12 md:p-24 rounded-[3rem] bg-indigo-600 overflow-hidden text-center">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-slate-900/20 blur-[100px] rounded-full -translate-x-1/2 translate-y-1/2" />
-
-            <h2 className="text-4xl md:text-6xl font-black text-white mb-8 relative z-10">
-              Ready to feel better?
-            </h2>
-            <p className="text-indigo-100 text-lg md:text-xl max-w-xl mx-auto mb-12 relative z-10 opacity-90">
-              Start your journey today. It's free, safe, and only takes a minute
-              to set up your profile.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 relative z-10">
-              <Link
-                to="/auth"
-                className="px-10 py-5 rounded-2xl bg-white text-indigo-600 font-black text-xl hover:bg-indigo-50 transition-all shadow-2xl shadow-slate-950/20 active:scale-95"
-              >
-                Get Started Now
-              </Link>
-              <a href="#" className="font-bold text-white hover:underline">
-                View crisis resources
-              </a>
+        <section className="pb-64 pt-32">
+          <div className="max-w-7xl mx-auto px-8">
+            <div className="relative p-20 md:p-32 rounded-[4.5rem] bg-foreground text-background overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] group">
+              <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-cyan-600/20 to-emerald-600/20 pointer-events-none" />
+              <div className="relative z-10 text-center max-w-3xl mx-auto">
+                <h2 className="text-6xl md:text-8xl font-black font-heading tracking-tighter mb-12 leading-[0.85]">
+                  The future <br /> of healing is{" "}
+                  <span className="text-cyan-400">here.</span>
+                </h2>
+                <p className="text-background/50 text-2xl font-medium mb-16 max-w-lg mx-auto leading-relaxed">
+                  Join 85,000+ users who have already started their journey to a
+                  better mind.
+                </p>
+                <MotionButton
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleStartJourney}
+                  className="px-16 py-8 rounded-[2.5rem] bg-white text-black font-black uppercase tracking-[0.2em] text-sm shadow-2xl hover:bg-cyan-400 transition-all"
+                >
+                  Get Started For Free
+                </MotionButton>
+              </div>
             </div>
           </div>
         </section>
       </main>
 
       <Footer />
-    </MotionDiv>
+    </div>
   );
 };
 

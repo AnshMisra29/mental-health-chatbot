@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Heart, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "./ThemeToggle";
 
 const MotionDiv = motion.div;
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,46 +29,57 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled
-          ? "py-4 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800"
-          : "py-6 bg-transparent"
+          ? "py-4 bg-background/80 backdrop-blur-xl border-b border-border/60 shadow-soft"
+          : "py-8 bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+      <div className="max-w-7xl mx-auto px-8 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-4 group">
+          <div className="w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-cyan-600 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
             <Heart className="w-6 h-6 text-white fill-current" />
           </div>
-          <span className="text-xl font-bold tracking-tight">InfiHeal</span>
+          <span className="text-2xl font-black font-heading tracking-tighter">
+            InfiHeal
+          </span>
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
+        <div className="hidden md:flex items-center gap-10">
+          <div className="flex items-center gap-8 px-8 py-3 rounded-full bg-card/40 backdrop-blur-sm border border-border/60 shadow-inner">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.href}
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 hover:text-cyan-600 transition-colors"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
             <Link
-              key={link.name}
-              to={link.href}
-              className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+              to={isAuthenticated ? "/dashboard" : "/auth"}
+              className="px-8 py-3.5 rounded-full bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white font-black uppercase tracking-widest text-[10px] transition-all shadow-xl shadow-cyan-500/10 hover:shadow-cyan-500/25 active:scale-95"
             >
-              {link.name}
+              {isAuthenticated ? "Dashboard" : "Sign In"}
             </Link>
-          ))}
-          <Link
-            to="/auth"
-            className="px-5 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-sm hover:bg-slate-200 transition-colors"
-          >
-            Sign In
-          </Link>
+          </div>
         </div>
 
         {/* Mobile Toggle */}
-        <button
-          className="md:hidden p-2 text-slate-300"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X /> : <Menu />}
-        </button>
+        <div className="flex items-center gap-4 md:hidden">
+          <ThemeToggle />
+          <button
+            className="p-2 text-[var(--foreground)]"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -75,25 +89,25 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-slate-900 border-b border-slate-800 overflow-hidden"
+            className="md:hidden bg-[var(--background)] border-b border-[var(--border)] overflow-hidden"
           >
             <div className="px-6 py-8 flex flex-col gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.href}
-                  className="text-lg font-medium text-slate-300"
+                  className="text-lg font-medium text-[var(--foreground)]/80"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.name}
                 </Link>
               ))}
               <Link
-                to="/auth"
-                className="w-full py-4 rounded-xl bg-indigo-600 text-white font-bold text-center shadow-lg shadow-indigo-500/20"
+                to={isAuthenticated ? "/dashboard" : "/auth"}
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-white font-semibold text-center transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Get Started
+                {isAuthenticated ? "Dashboard" : "Get Started"}
               </Link>
             </div>
           </MotionDiv>

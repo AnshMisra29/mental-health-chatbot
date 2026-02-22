@@ -1,19 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Send,
-  Sparkles,
-  User,
-  Info,
-  MoreHorizontal,
-  Smile,
-  Paperclip,
-} from "lucide-react";
+import { Send, Sparkles, User, Info, Smile, Paperclip } from "lucide-react";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
-import { addMessage, setTyping, sendMessage } from "../features/chat/chatSlice";
+import { addMessage, sendMessage } from "../features/chat/chatSlice";
 
 const MotionDiv = motion.div;
+const MotionButton = motion.button;
 
 const ChatPage = () => {
   const [input, setInput] = useState("");
@@ -21,12 +14,13 @@ const ChatPage = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
-  const msgCounter = useRef(0);
+  const hasMessages = messages && messages.length > 0;
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (!scrollRef.current) return;
+    // Avoid auto-scrolling when there are no messages (welcome state)
+    if (!messages || messages.length === 0) return;
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, isTyping]);
 
   const handleSend = async (e) => {
@@ -60,27 +54,27 @@ const ChatPage = () => {
 
   return (
     <AuthenticatedLayout>
-      <div className="flex h-full flex-col relative overflow-hidden bg-slate-950">
-        {/* Immersive Background Elements */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-500/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
-
-        {/* Chat Header Info */}
-        <div className="px-8 py-4 bg-slate-900/40 backdrop-blur-md border-b border-slate-800 flex items-center justify-between z-10">
+      <div className="flex flex-1 flex-col relative overflow-hidden bg-background min-h-0">
+        <div className="px-8 py-5 bg-background/80 backdrop-blur-xl border-b border-border/60 flex items-center justify-between z-10">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-cyan-500 to-emerald-500 p-0.5 shadow-lg group transition-transform hover:scale-105 active:scale-95 cursor-pointer">
+              <div className="w-full h-full rounded-[1.1rem] bg-background flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-cyan-500 group-hover:animate-pulse" />
+              </div>
             </div>
             <div>
-              <h2 className="text-sm font-black text-white">Sia AI</h2>
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] text-emerald-500 font-black uppercase tracking-wider">
-                  Sia is Online
+              <h2 className="text-xl font-black text-foreground font-heading tracking-tight leading-tight">
+                Sia AI
+              </h2>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-[0.2em]">
+                  Online
                 </span>
               </div>
             </div>
           </div>
-          <button className="p-2 text-slate-400 hover:text-white transition-colors">
+          <button className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-foreground/40 hover:text-cyan-500 hover:bg-cyan-500/5 transition-all">
             <Info className="w-5 h-5" />
           </button>
         </div>
@@ -88,73 +82,85 @@ const ChatPage = () => {
         {/* Message Area */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto p-8 space-y-8 scroll-smooth"
+          className={`flex-1 ${hasMessages ? "overflow-y-auto space-y-8 scroll-smooth" : "flex items-center justify-center"} px-8 py-10`}
         >
-          {messages.length === 0 && (
-            <div className="max-w-md mx-auto text-center mt-20">
-              <div className="w-20 h-20 rounded-3xl bg-indigo-600/10 flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
-                <Sparkles className="w-10 h-10 text-indigo-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">
-                Welcome, {user?.name || "Friend"}
+          {!hasMessages && (
+            <div className="max-w-xl mx-auto text-center px-6">
+              <MotionDiv
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 flex items-center justify-center mx-auto mb-10 border border-cyan-500/10 shadow-soft"
+              >
+                <Sparkles className="w-12 h-12 text-cyan-600 dark:text-cyan-400" />
+              </MotionDiv>
+              <h3 className="text-4xl md:text-5xl font-black mb-6 font-heading tracking-tight leading-tight">
+                Welcome, {user?.name?.split(" ")[0] || "Friend"}
               </h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                I'm Sia, your personal AI companion. I'm here to listen,
-                support, and help you navigate your journey. What's on your mind
-                today?
+              <p className="text-foreground/40 text-lg font-medium leading-relaxed max-w-md mx-auto mb-12">
+                I’m Sia, your personal AI companion. I’m here to listen,
+                support, and help you navigate your journey. What’s on your
+                mind?
               </p>
-              <div className="mt-8 grid grid-cols-2 gap-3">
-                {quickReplies.map((reply) => (
-                  <button
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
+                {quickReplies.map((reply, i) => (
+                  <MotionDiv
                     key={reply}
-                    onClick={() => {
-                      setInput(reply);
-                      // Automatic send logic could go here
-                    }}
-                    className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-400 hover:border-indigo-500/50 hover:text-white transition-all"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * i }}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setInput(reply)}
+                    className="p-5 rounded-2xl bg-card border border-border/60 text-xs font-black uppercase tracking-widest text-foreground/40 hover:border-cyan-400/30 hover:text-cyan-600 hover:shadow-soft transition-all cursor-pointer text-center"
                   >
                     {reply}
-                  </button>
+                  </MotionDiv>
                 ))}
               </div>
             </div>
           )}
 
           <AnimatePresence initial={false}>
-            {messages.map((msg) => (
+            {(messages || []).map((msg) => (
               <MotionDiv
                 key={msg.id}
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                className={`flex gap-4 ${msg.sender === "user" ? "flex-row-reverse text-right" : ""}`}
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className={`flex gap-6 ${msg.sender === "user" ? "flex-row-reverse" : ""}`}
               >
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 ${msg.sender === "user"
-                    ? "bg-indigo-500/20 text-indigo-400"
-                    : "bg-slate-800 text-slate-400"
-                    }`}
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1 shadow-soft p-3 ${
+                    msg.sender === "user"
+                      ? "bg-cyan-500 text-white"
+                      : "bg-card border border-border/60 text-foreground/40"
+                  }`}
                 >
                   {msg.sender === "user" ? (
-                    <User className="w-4 h-4" />
+                    <User className="w-6 h-6" />
                   ) : (
-                    <Sparkles className="w-4 h-4" />
+                    <Sparkles className="w-6 h-6" />
                   )}
                 </div>
-                <div className="max-w-[75%] space-y-1">
+                <div
+                  className={`max-w-[70%] space-y-2 ${msg.sender === "user" ? "text-right" : ""}`}
+                >
                   <div
-                    className={`px-5 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.sender === "user"
-                      ? "bg-indigo-600 text-white rounded-tr-none"
-                      : "bg-slate-900 border border-slate-800 text-slate-300 rounded-tl-none"
-                      }`}
+                    className={`px-8 py-5 rounded-[2.5rem] text-sm md:text-base leading-relaxed shadow-soft font-medium ${
+                      msg.sender === "user"
+                        ? "bg-gradient-to-r from-cyan-600 to-sky-600 text-white rounded-tr-none"
+                        : "bg-card border border-border/60 text-foreground/80 rounded-tl-none backdrop-blur-sm"
+                    }`}
                   >
                     {msg.text}
                   </div>
-                  <div className="flex items-center gap-2 px-1">
-                    <p className="text-[10px] font-bold text-slate-600">
+                  <div
+                    className={`flex items-center gap-3 px-3 ${msg.sender === "user" ? "flex-row-reverse" : ""}`}
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-widest text-foreground/20">
                       {msg.timestamp}
                     </p>
                     {msg.sender === "ai" && msg.emotion && (
-                      <span className="text-[10px] font-black text-indigo-400/60 uppercase tracking-tighter">
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-500 opacity-60">
                         • {msg.emotion}
                       </span>
                     )}
@@ -165,58 +171,67 @@ const ChatPage = () => {
           </AnimatePresence>
 
           {isTyping && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex gap-4"
+            <MotionDiv
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="flex gap-6"
             >
-              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 animate-pulse">
-                <Sparkles className="w-4 h-4" />
+              <div className="w-12 h-12 rounded-2xl bg-card border border-border/60 shadow-soft flex items-center justify-center text-foreground/40 p-3">
+                <Sparkles className="w-6 h-6" />
               </div>
-              <div className="px-5 py-4 rounded-2xl bg-slate-900 border border-slate-800 rounded-tl-none flex gap-1.5 items-center">
-                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
+              <div className="px-8 py-5 rounded-[2rem] bg-card border border-border/60 rounded-tl-none shadow-soft flex gap-2.5 items-center">
+                <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce" />
               </div>
-            </motion.div>
+            </MotionDiv>
           )}
         </div>
 
         {/* Input Area */}
-        <div className="p-8 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent">
+        <div className="px-8 py-10 bg-background/80 backdrop-blur-xl border-t border-border/60">
           <form
             onSubmit={handleSend}
             className="max-w-4xl mx-auto relative group"
           >
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-[2.2rem] opacity-20 blur group-focus-within:opacity-40 transition-opacity" />
-            <div className="relative flex items-center bg-slate-900 border border-slate-800 rounded-[2rem] p-2 pl-6 focus-within:border-indigo-500/50 transition-all shadow-2xl">
-              <Smile className="w-6 h-6 text-slate-500 hover:text-indigo-400 cursor-pointer transition-colors" />
+            <div className="flex items-center bg-card border border-border/60 rounded-[3rem] p-4 pl-10 pr-4 shadow-soft transition-all duration-500 focus-within:shadow-xl focus-within:border-cyan-400/30 focus-within:scale-[1.01]">
+              <Smile className="w-8 h-8 text-foreground/20 hover:text-cyan-500 cursor-pointer transition-colors p-1" />
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type a message or just say how you feel..."
-                className="flex-1 bg-transparent px-4 py-3 text-sm text-white focus:outline-none placeholder:text-slate-600"
+                placeholder="Share your thoughts with Sia..."
+                className="flex-1 bg-transparent px-6 py-4 text-lg text-foreground focus:outline-none placeholder:text-foreground/30 font-medium"
               />
-              <div className="flex items-center gap-2 pr-2">
+              <div className="flex items-center gap-4">
                 <button
                   type="button"
-                  className="p-2 text-slate-500 hover:text-indigo-400 transition-colors"
+                  className="w-12 h-12 rounded-full text-foreground/20 hover:text-cyan-500 hover:bg-cyan-500/5 transition-all flex items-center justify-center"
                 >
                   <Paperclip className="w-5 h-5" />
                 </button>
-                <button
+                <MotionButton
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={!input.trim()}
-                  className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 disabled:opacity-50 disabled:scale-95 transition-all"
+                  className="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-600 to-sky-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 disabled:opacity-20 transition-all hover:shadow-cyan-500/40"
                 >
-                  <Send className="w-4 h-4" />
-                </button>
+                  <Send className="w-6 h-6" />
+                </MotionButton>
               </div>
             </div>
+            <div className="absolute -bottom-8 left-10 flex gap-6">
+              <span className="text-[10px] font-black uppercase tracking-widest text-foreground/20">
+                Sia is listening
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-cyan-500 opacity-0 group-focus-within:opacity-100 transition-opacity">
+                Type naturally
+              </span>
+            </div>
           </form>
-          <p className="text-center text-[10px] text-slate-600 mt-4 font-bold uppercase tracking-widest">
-            Sia AI can make mistakes. Consider checking important info.
+          <p className="text-center text-[10px] text-foreground/30 mt-3 tracking-wide">
+            Sia may make mistakes. Always check important information.
           </p>
         </div>
       </div>

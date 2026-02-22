@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, User, ArrowRight, Github, Heart } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, GithubIcon, Heart } from "lucide-react";
 import { login, register, clearError } from "../features/auth/authSlice";
 
 const MotionDiv = motion.div;
@@ -20,7 +20,9 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isLogin) {
-      const result = await dispatch(login({ email: formData.email, password: formData.password }));
+      const result = await dispatch(
+        login({ email: formData.email, password: formData.password }),
+      );
       if (login.fulfilled.match(result)) {
         navigate("/dashboard");
       }
@@ -43,68 +45,74 @@ const AuthPage = () => {
     <MotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden"
+      className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 relative overflow-hidden transition-colors duration-300"
     >
-      {/* Background Orbs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-600/10 blur-[100px] rounded-full -translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full translate-x-1/2 translate-y-1/2" />
+      {/* Subtle background */}
+      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-gradient-to-br from-cyan-400/8 to-emerald-400/6 blur-[140px] rounded-full -translate-x-1/2 -translate-y-1/2" />
 
       <MotionDiv
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md"
       >
-        <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-2 group mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <Heart className="w-7 h-7 text-white fill-current" />
+        <div className="text-center mb-12">
+          <Link to="/" className="inline-flex items-center gap-4 group mb-10">
+            <div className="w-16 h-16 rounded-[2rem] bg-gradient-to-br from-cyan-600 to-emerald-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500">
+              <Heart className="w-8 h-8 text-white fill-current" />
             </div>
-            <span className="text-2xl font-black tracking-tight">InfiHeal</span>
+            <span className="text-4xl font-black font-heading tracking-tighter">
+              InfiHeal
+            </span>
           </Link>
-          <h2 className="text-3xl font-bold bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-black text-foreground font-heading tracking-tight mb-4 leading-tight">
             {isLogin ? "Welcome back" : "Start your journey"}
           </h2>
-          <p className="text-slate-400 mt-2">
+          <p className="text-foreground/40 text-lg font-medium">
             {isLogin
               ? "Sign in to continue your progress"
               : "Join a community of support and empathy"}
           </p>
         </div>
 
-        <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-[2.5rem] p-8 md:p-10 shadow-2xl">
+        <div className="bg-card/40 backdrop-blur-xl border border-border/60 rounded-[3.5rem] p-10 md:p-14 relative overflow-hidden shadow-soft group">
+          {/* Top accent */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-600 via-cyan-400 to-emerald-500 opacity-60 rounded-t-[3.5rem]" />
+
           {/* Mode Switcher */}
-          <div className="flex p-1 bg-slate-950 rounded-2xl mb-8 border border-slate-800">
+          <div className="flex p-1.5 bg-background border border-border/60 rounded-[2rem] mb-12 gap-1.5 shadow-inner">
             <button
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${isLogin
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                : "text-slate-500 hover:text-white"
-                }`}
+              className={`flex-1 py-4 rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-sm ${
+                isLogin
+                  ? "bg-cyan-600 text-white shadow-xl translate-y-[-1px]"
+                  : "text-foreground/40 hover:text-cyan-600 hover:bg-cyan-500/5"
+              }`}
             >
               Login
             </button>
             <button
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${!isLogin
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                : "text-slate-500 hover:text-white"
-                }`}
+              className={`flex-1 py-4 rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-sm ${
+                !isLogin
+                  ? "bg-cyan-600 text-white shadow-xl translate-y-[-1px]"
+                  : "text-foreground/40 hover:text-cyan-600 hover:bg-cyan-500/5"
+              }`}
             >
               Register
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <AnimatePresence mode="wait">
               {!isLogin && (
                 <MotionDiv
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-5 overflow-hidden"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="space-y-6 overflow-hidden"
                 >
                   <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                    <User className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-foreground/20 group-focus-within:text-cyan-500 transition-colors" />
                     <input
                       type="text"
                       name="fullName"
@@ -112,7 +120,7 @@ const AuthPage = () => {
                       required
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-slate-700"
+                      className="w-full pl-16 pr-6 py-5 rounded-[2rem] bg-background border border-border/60 focus:outline-none focus:border-cyan-400/30 focus:ring-[12px] focus:ring-cyan-500/5 transition-all text-lg text-foreground placeholder:text-foreground/20 font-medium"
                     />
                   </div>
                 </MotionDiv>
@@ -120,7 +128,7 @@ const AuthPage = () => {
             </AnimatePresence>
 
             <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+              <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-foreground/20 group-focus-within:text-cyan-500 transition-colors" />
               <input
                 type="email"
                 name="email"
@@ -128,12 +136,12 @@ const AuthPage = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-slate-700"
+                className="w-full pl-16 pr-6 py-5 rounded-[2rem] bg-background border border-border/60 focus:outline-none focus:border-cyan-400/30 focus:ring-[12px] focus:ring-cyan-500/5 transition-all text-lg text-foreground placeholder:text-foreground/20 font-medium"
               />
             </div>
 
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+              <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-foreground/20 group-focus-within:text-cyan-500 transition-colors" />
               <input
                 type="password"
                 name="password"
@@ -141,66 +149,68 @@ const AuthPage = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-slate-700"
+                className="w-full pl-16 pr-6 py-5 rounded-[2rem] bg-background border border-border/60 focus:outline-none focus:border-cyan-400/30 focus:ring-[12px] focus:ring-cyan-500/5 transition-all text-lg text-foreground placeholder:text-foreground/20 font-medium"
               />
             </div>
 
             {authError && (
-              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold text-center">
+              <div className="px-6 py-4 rounded-[1.5rem] bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-widest text-center shadow-sm">
                 {authError}
               </div>
             )}
 
             {isLogin && (
-              <div className="text-right">
+              <div className="text-right px-4">
                 <button
                   type="button"
-                  className="text-xs font-bold text-indigo-400 hover:text-indigo-300"
+                  className="text-xs font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-all"
                 >
                   Forgot password?
                 </button>
               </div>
             )}
 
-            <button
+            <MotionButton
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               disabled={loading}
               type="submit"
-              className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
+              className="w-full py-6 rounded-[2rem] bg-gradient-to-br from-cyan-600 to-sky-600 hover:from-cyan-400 hover:to-sky-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all font-black uppercase tracking-widest text-xs text-white shadow-xl shadow-cyan-500/20 flex items-center justify-center gap-3 active:scale-95"
             >
               {loading ? (
                 <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   {isLogin ? "Sign In" : "Create Account"}
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
-            </button>
+            </MotionButton>
           </form>
 
-          <div className="mt-8 flex items-center gap-4">
-            <div className="flex-1 h-px bg-slate-800" />
-            <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">
-              or continue with
+          <div className="mt-12 flex items-center gap-6">
+            <div className="flex-1 h-px bg-border/60" />
+            <span className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] whitespace-nowrap">
+              Secure Access
             </span>
-            <div className="flex-1 h-px bg-slate-800" />
+            <div className="flex-1 h-px bg-border/60" />
           </div>
 
-          <div className="mt-6">
-            <button className="w-full py-4 rounded-2xl bg-slate-950 border border-slate-800 hover:bg-slate-900 transition-all font-bold text-sm flex items-center justify-center gap-3 active:scale-95">
-              <Github className="w-5 h-5" />
-              Github
+          <div className="mt-10">
+            <button className="w-full py-5 rounded-[2rem] bg-background border border-border/60 hover:bg-cyan-500/5 hover:border-cyan-400/20 transition-all font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-4 active:scale-95 text-foreground/50 hover:text-cyan-600 shadow-sm">
+              <GithubIcon className="w-6 h-6 text-foreground" />
+              Github Connection
             </button>
           </div>
         </div>
 
-        <p className="text-center text-slate-500 mt-10 text-sm">
+        <p className="text-center text-foreground/20 mt-12 text-[10px] font-black uppercase tracking-[0.2em] max-w-xs mx-auto leading-loose">
           By continuing, you agree to our <br />
-          <span className="text-slate-300 font-medium cursor-pointer hover:underline">
+          <span className="text-cyan-600 cursor-pointer hover:underline">
             Terms of Service
           </span>{" "}
-          and{" "}
-          <span className="text-slate-300 font-medium cursor-pointer hover:underline">
+          &{" "}
+          <span className="text-cyan-600 cursor-pointer hover:underline">
             Privacy Policy
           </span>
         </p>

@@ -5,7 +5,6 @@ import {
   BarChart2,
   MessageCircle,
   Users,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -16,6 +15,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { setSidebarOpen, closeModal } from "../features/ui/uiSlice";
 import { logout } from "../features/auth/authSlice";
+import ThemeToggle from "./ThemeToggle";
 
 const MotionDiv = motion.div;
 
@@ -30,7 +30,7 @@ const AuthenticatedLayout = ({ children }) => {
     { name: "Sia Chat", icon: MessageCircle, path: "/chat" },
     { name: "Community", icon: Users, path: "/community" },
     { name: "Resources", icon: BookOpen, path: "/community" },
-    { name: "Mood Tracker", icon: BarChart2, path: "/dashboard" },
+    { name: "Mood Tracker", icon: BarChart2, path: "/mood-tracker" },
   ];
 
   const getPageTitle = () => {
@@ -41,6 +41,8 @@ const AuthenticatedLayout = ({ children }) => {
         return "AI Companion";
       case "/community":
         return "Wellness Feed";
+      case "/mood-tracker":
+        return "Mood Tracker";
       case "/help":
         return "Support center";
       default:
@@ -49,35 +51,33 @@ const AuthenticatedLayout = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-950 overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden transition-colors duration-300">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed inset-y-0 left-0 z-50 w-80 bg-card/60 backdrop-blur-2xl border-r border-border/60 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="flex flex-col h-full">
-          <div className="p-8 flex items-center justify-between">
+          <div className="p-10 flex items-center justify-between">
             <Link
               to="/"
               onClick={() => dispatch(setSidebarOpen(false))}
-              className="flex items-center gap-3"
+              className="flex items-center gap-4 group"
             >
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div className="w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-cyan-600 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
                 <Heart className="w-6 h-6 text-white fill-current" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-white">
+              <span className="text-2xl font-black font-heading tracking-tighter text-foreground pl-1">
                 InfiHeal
               </span>
             </Link>
-            <button
-              onClick={() => dispatch(setSidebarOpen(false))}
-              className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
-          <nav className="flex-1 px-4 space-y-1">
+          <nav className="flex-1 px-8 space-y-3 mt-10">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/20 mb-6 px-4">
+              Main Navigation
+            </div>
             {menuItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -85,30 +85,40 @@ const AuthenticatedLayout = ({ children }) => {
                   key={item.name}
                   to={item.path}
                   onClick={() => dispatch(setSidebarOpen(false))}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 active:scale-95 ${isActive
-                      ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
+                  className={`flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 group relative ${
+                    isActive
+                      ? "bg-cyan-600/5 text-cyan-600 shadow-sm border border-cyan-400/20"
+                      : "text-foreground/40 hover:text-cyan-600 hover:bg-cyan-500/5"
+                  }`}
                 >
                   <item.icon
-                    className={`w-5 h-5 ${isActive ? "text-indigo-400" : "text-slate-400"}`}
+                    className={`w-6 h-6 transition-transform duration-500 group-hover:scale-110 ${isActive ? "text-cyan-600" : "text-foreground/25"}`}
                   />
-                  {item.name}
+                  <span className="text-xs font-black uppercase tracking-widest">
+                    {item.name}
+                  </span>
+                  {isActive && (
+                    <div className="absolute left-[-2rem] w-1.5 h-8 bg-cyan-600 rounded-r-full" />
+                  )}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="p-6 border-t border-slate-800">
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center font-bold text-indigo-400">
-                {user?.name?.[0] || "U"}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white truncate">
-                  {user?.name || "User"}
-                </p>
-                <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+          <div className="p-8 border-t border-border/60">
+            <div className="p-6 rounded-[2rem] bg-foreground/5 border border-border/60 mb-8 group hover:bg-cyan-500/5 transition-all duration-500">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-400 flex items-center justify-center text-white font-black text-xs shadow-md group-hover:scale-110 transition-transform">
+                  {user?.name?.[0] || "U"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-black text-foreground truncate uppercase tracking-widest">
+                    {user?.name || "User"}
+                  </p>
+                  <p className="text-[10px] text-foreground/30 font-black uppercase tracking-tighter">
+                    Pro member
+                  </p>
+                </div>
               </div>
             </div>
             <button
@@ -116,7 +126,7 @@ const AuthenticatedLayout = ({ children }) => {
                 dispatch(logout());
                 dispatch(setSidebarOpen(false));
               }}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-sm font-bold text-rose-400 hover:bg-rose-500/10 transition-all font-outfit"
+              className="w-full flex items-center gap-4 px-6 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] text-rose-500/40 hover:text-rose-600 hover:bg-rose-500/5 transition-all border border-transparent hover:border-rose-400/20"
             >
               <LogOut className="w-5 h-5" />
               Sign Out
@@ -133,7 +143,7 @@ const AuthenticatedLayout = ({ children }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => dispatch(setSidebarOpen(false))}
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
           />
         )}
       </AnimatePresence>
@@ -141,10 +151,10 @@ const AuthenticatedLayout = ({ children }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="h-16 flex items-center justify-between px-8 bg-slate-950/50 backdrop-blur-xl border-b border-slate-900 z-30">
+        <header className="h-16 flex items-center justify-between px-8 bg-background/50 backdrop-blur-xl border-b border-border z-30">
           <div className="flex items-center gap-4 flex-1">
             <button
-              className="p-2 text-slate-400 hover:text-white bg-slate-900/50 rounded-lg border border-slate-800 transition-all hover:border-indigo-500/50"
+              className="p-2 text-foreground/60 hover:text-foreground bg-card rounded-lg border border-border transition-colors hover:border-border"
               onClick={() => dispatch(setSidebarOpen(!isSidebarOpen))}
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -164,10 +174,10 @@ const AuthenticatedLayout = ({ children }) => {
               </AnimatePresence>
             </button>
             <div className="flex flex-col">
-              <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em]">
+              <span className="text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.2em]">
                 {getPageTitle()}
               </span>
-              <h1 className="text-sm font-bold text-white leading-tight">
+              <h1 className="text-sm font-bold text-foreground leading-tight">
                 {location.pathname === "/chat"
                   ? "Empathy & Support"
                   : "Good morning, " + (user?.name?.split(" ")[0] || "User")}
@@ -175,6 +185,7 @@ const AuthenticatedLayout = ({ children }) => {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <AnimatePresence mode="wait">
               {location.pathname !== "/chat" && (
                 <MotionDiv
@@ -185,7 +196,7 @@ const AuthenticatedLayout = ({ children }) => {
                   <Link
                     to="/chat"
                     onClick={() => dispatch(setSidebarOpen(false))}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all text-xs font-bold shadow-lg shadow-indigo-500/20 block"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 transition-colors text-xs font-medium block text-white"
                   >
                     Talk to Sia
                   </Link>
@@ -195,7 +206,7 @@ const AuthenticatedLayout = ({ children }) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-slate-950 px-4 md:px-0">
+        <main className="flex-1 flex flex-col min-h-0 bg-background overflow-hidden px-4 md:px-0">
           <AnimatePresence mode="wait">
             <MotionDiv
               key={location.pathname}
@@ -203,6 +214,7 @@ const AuthenticatedLayout = ({ children }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
+              className="flex-1 flex flex-col min-h-0"
             >
               {children}
             </MotionDiv>
@@ -212,28 +224,32 @@ const AuthenticatedLayout = ({ children }) => {
 
       {/* Global Modal Overlay */}
       {modal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-[2.5rem] p-8 relative shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-background/40 backdrop-blur-xl">
+          <MotionDiv
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-card border border-border/60 w-full max-w-xl rounded-[3.5rem] p-12 relative shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)]"
+          >
             <button
               onClick={() => dispatch(closeModal())}
-              className="absolute top-6 right-6 p-2 rounded-xl bg-slate-950 text-slate-400 hover:text-white border border-slate-800 transition-colors"
+              className="absolute top-8 right-8 w-12 h-12 rounded-2xl bg-background border border-border/60 flex items-center justify-center text-foreground/30 hover:text-cyan-600 hover:border-cyan-400/30 transition-all hover:rotate-90"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="mb-8">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 flex items-center justify-center mb-4">
-                <Heart className="w-6 h-6 text-indigo-500" />
+            <div className="mb-10">
+              <div className="w-16 h-16 rounded-[1.5rem] bg-cyan-600/10 flex items-center justify-center mb-8">
+                <Heart className="w-8 h-8 text-cyan-600 fill-cyan-600/20" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-600 mb-2">
+                {modal.data?.type || "Resources"}
+              </h4>
+              <h2 className="text-4xl font-black font-heading tracking-tighter text-foreground leading-tight">
                 {modal.data?.title || "Sia Support"}
               </h2>
-              <p className="text-slate-400">
-                {modal.data?.type || "Resources"}
-              </p>
             </div>
 
-            <div className="space-y-4 text-slate-300 leading-relaxed text-sm">
+            <div className="space-y-6 text-foreground/40 text-lg font-medium leading-relaxed mb-12">
               <p>
                 {modal.data?.author
                   ? "Contribution by " + modal.data.author
@@ -241,17 +257,20 @@ const AuthenticatedLayout = ({ children }) => {
               </p>
               <p>
                 This content is currently being finalized to provide you with
-                the most accurate and empathetic support possible.
+                the most accurate and empathetic support possible. We're
+                dedicated to your journey.
               </p>
             </div>
 
-            <button
+            <MotionButton
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => dispatch(closeModal())}
-              className="w-full mt-10 py-4 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-all"
+              className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-cyan-600/20 transition-all"
             >
-              Close
-            </button>
-          </div>
+              Understand & Close
+            </MotionButton>
+          </MotionDiv>
         </div>
       )}
     </div>

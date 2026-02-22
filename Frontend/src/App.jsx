@@ -11,13 +11,14 @@ import DashboardPage from "./pages/DashboardPage";
 import CommunityPage from "./pages/CommunityPage";
 import ChatPage from "./pages/ChatPage";
 import HelpPage from "./pages/HelpPage";
+import MoodTrackerPage from "./pages/MoodTrackerPage";
 
 function App() {
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   return (
     <Router>
-      <div className="min-h-screen bg-slate-900 text-white selection:bg-indigo-500/30 overflow-x-hidden">
+      <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 selection:bg-cyan-500/15 overflow-x-hidden">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
@@ -33,6 +34,7 @@ function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/help" element={<HelpPage />} />
+          <Route path="/mood-tracker" element={<MoodTrackerPage />} />
 
           {/* Catch-all */}
           <Route
