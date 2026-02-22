@@ -41,7 +41,7 @@ const AuthPage = () => {
     <MotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden"
+      className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 relative overflow-hidden transition-colors duration-300"
     >
       {/* Background Orbs */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-600/10 blur-[100px] rounded-full -translate-x-1/2 -translate-y-1/2" />
@@ -59,25 +59,25 @@ const AuthPage = () => {
             </div>
             <span className="text-2xl font-black tracking-tight">InfiHeal</span>
           </Link>
-          <h2 className="text-3xl font-bold bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold text-foreground">
             {isLogin ? "Welcome back" : "Start your journey"}
           </h2>
-          <p className="text-slate-400 mt-2">
+          <p className="text-foreground/60 mt-2">
             {isLogin
               ? "Sign in to continue your progress"
               : "Join a community of support and empathy"}
           </p>
         </div>
 
-        <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-[2.5rem] p-8 md:p-10 shadow-2xl">
+        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-[2.5rem] p-8 md:p-10 shadow-2xl">
           {/* Mode Switcher */}
-          <div className="flex p-1 bg-slate-950 rounded-2xl mb-8 border border-slate-800">
+          <div className="flex p-1 bg-background rounded-2xl mb-8 border border-border">
             <button
               onClick={() => setIsLogin(true)}
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
                 isLogin
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                  : "text-slate-500 hover:text-white"
+                  : "text-foreground/50 hover:text-foreground"
               }`}
             >
               Login
@@ -87,7 +87,7 @@ const AuthPage = () => {
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
                 !isLogin
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                  : "text-slate-500 hover:text-white"
+                  : "text-foreground/50 hover:text-foreground"
               }`}
             >
               Register
@@ -104,7 +104,7 @@ const AuthPage = () => {
                   className="space-y-5 overflow-hidden"
                 >
                   <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50 group-focus-within:text-indigo-400 transition-colors" />
                     <input
                       type="text"
                       name="fullName"
@@ -112,7 +112,7 @@ const AuthPage = () => {
                       required
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-slate-700"
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-background border border-border focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-foreground/20 text-foreground"
                     />
                   </div>
                 </MotionDiv>
@@ -120,7 +120,7 @@ const AuthPage = () => {
             </AnimatePresence>
 
             <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50 group-focus-within:text-indigo-400 transition-colors" />
               <input
                 type="email"
                 name="email"
@@ -128,12 +128,12 @@ const AuthPage = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-slate-700"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-background border border-border focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-foreground/20 text-foreground"
               />
             </div>
 
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50 group-focus-within:text-indigo-400 transition-colors" />
               <input
                 type="password"
                 name="password"
@@ -141,7 +141,7 @@ const AuthPage = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-slate-700"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-background border border-border focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-foreground/20 text-foreground"
               />
             </div>
 
@@ -173,15 +173,15 @@ const AuthPage = () => {
           </form>
 
           <div className="mt-8 flex items-center gap-4">
-            <div className="flex-1 h-px bg-slate-800" />
+            <div className="flex-1 h-px bg-border" />
             <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">
               or continue with
             </span>
-            <div className="flex-1 h-px bg-slate-800" />
+            <div className="flex-1 h-px bg-border" />
           </div>
 
           <div className="mt-6">
-            <button className="w-full py-4 rounded-2xl bg-slate-950 border border-slate-800 hover:bg-slate-900 transition-all font-bold text-sm flex items-center justify-center gap-3 active:scale-95">
+            <button className="w-full py-4 rounded-2xl bg-background border border-border hover:bg-card transition-all font-bold text-sm flex items-center justify-center gap-3 active:scale-95 text-foreground">
               <Github className="w-5 h-5" />
               Github
             </button>
@@ -190,11 +190,11 @@ const AuthPage = () => {
 
         <p className="text-center text-slate-500 mt-10 text-sm">
           By continuing, you agree to our <br />
-          <span className="text-slate-300 font-medium cursor-pointer hover:underline">
+          <span className="text-foreground/80 font-medium cursor-pointer hover:underline">
             Terms of Service
           </span>{" "}
           and{" "}
-          <span className="text-slate-300 font-medium cursor-pointer hover:underline">
+          <span className="text-foreground/80 font-medium cursor-pointer hover:underline">
             Privacy Policy
           </span>
         </p>

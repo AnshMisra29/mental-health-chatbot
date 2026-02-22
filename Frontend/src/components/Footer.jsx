@@ -4,7 +4,7 @@ import { Heart, Github, Twitter, Instagram, Linkedin } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-950 border-t border-slate-900 pt-20 pb-10">
+    <footer className="bg-background border-t border-border pt-20 pb-10 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16">
           <div className="col-span-2">
@@ -14,7 +14,7 @@ const Footer = () => {
               </div>
               <span className="text-lg font-bold">InfiHeal</span>
             </Link>
-            <p className="text-slate-400 max-w-sm mb-8">
+            <p className="text-foreground/70 max-w-sm mb-8">
               Making mental healthcare accessible, affordable, and stigma-free
               globally. Your journey to wellness starts here.
             </p>
@@ -23,7 +23,7 @@ const Footer = () => {
                 <a
                   key={i}
                   href="#"
-                  className="p-2 rounded-lg bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                  className="p-2 rounded-lg bg-card text-foreground/70 hover:text-foreground hover:bg-border transition-all border border-border"
                 >
                   <Icon className="w-5 h-5" />
                 </a>
@@ -33,7 +33,7 @@ const Footer = () => {
 
           <div>
             <h4 className="font-bold mb-6">Product</h4>
-            <ul className="space-y-4 text-slate-400 text-sm">
+            <ul className="space-y-4 text-foreground/70 text-sm">
               <li>
                 <Link to="/chat" className="hover:text-white transition-colors">
                   Healo AI
@@ -42,7 +42,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/community"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-indigo-600 dark:hover:text-white transition-colors"
                 >
                   Community
                 </Link>
@@ -62,7 +62,7 @@ const Footer = () => {
 
           <div>
             <h4 className="font-bold mb-6">Company</h4>
-            <ul className="space-y-4 text-slate-400 text-sm">
+            <ul className="space-y-4 text-foreground/70 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
                   About Us
@@ -88,7 +88,7 @@ const Footer = () => {
 
           <div>
             <h4 className="font-bold mb-6">Support</h4>
-            <ul className="space-y-4 text-slate-400 text-sm">
+            <ul className="space-y-4 text-foreground/70 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
                   Help Center
@@ -108,7 +108,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-xs">
+        <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-foreground/50 text-xs">
           <p>© 2026 InfiHeal. All rights reserved.</p>
           <p>Carefully crafted for a better tomorrow.</p>
         </div>

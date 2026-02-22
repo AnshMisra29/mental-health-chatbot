@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "./ThemeToggle";
 
 const MotionDiv = motion.div;
 
@@ -28,7 +29,7 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "py-4 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800"
+          ? "py-4 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--border)]"
           : "py-6 bg-transparent"
       }`}
     >
@@ -46,26 +47,32 @@ const Navbar = () => {
             <Link
               key={link.name}
               to={link.href}
-              className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+              className="text-sm font-medium text-[var(--foreground)]/70 hover:text-[var(--foreground)] transition-colors"
             >
               {link.name}
             </Link>
           ))}
+
+          <ThemeToggle />
+
           <Link
             to="/auth"
-            className="px-5 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-sm hover:bg-slate-200 transition-colors"
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20"
           >
             Sign In
           </Link>
         </div>
 
         {/* Mobile Toggle */}
-        <button
-          className="md:hidden p-2 text-slate-300"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X /> : <Menu />}
-        </button>
+        <div className="flex items-center gap-4 md:hidden">
+          <ThemeToggle />
+          <button
+            className="p-2 text-[var(--foreground)]"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -75,14 +82,14 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-slate-900 border-b border-slate-800 overflow-hidden"
+            className="md:hidden bg-[var(--background)] border-b border-[var(--border)] overflow-hidden"
           >
             <div className="px-6 py-8 flex flex-col gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.href}
-                  className="text-lg font-medium text-slate-300"
+                  className="text-lg font-medium text-[var(--foreground)]/80"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.name}

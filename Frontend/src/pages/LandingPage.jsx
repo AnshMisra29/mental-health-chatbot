@@ -38,7 +38,7 @@ const LandingPage = () => {
     <MotionDiv
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-slate-950 min-h-screen selection:bg-indigo-500/30"
+      className="bg-background min-h-screen selection:bg-indigo-500/30 text-foreground transition-colors duration-300"
     >
       <Navbar />
 
@@ -57,7 +57,7 @@ const LandingPage = () => {
           >
             <MotionDiv
               variants={itemVariants}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-800 text-indigo-400 text-xs font-semibold mb-8 backdrop-blur-md"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/50 border border-border text-indigo-500 dark:text-indigo-400 text-xs font-semibold mb-8 backdrop-blur-md"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Join 50,000+ users on their wellness journey</span>
@@ -73,7 +73,7 @@ const LandingPage = () => {
 
             <MotionP
               variants={itemVariants}
-              className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed"
+              className="text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto mb-10 leading-relaxed"
             >
               Healo is more than a chatbot. It's an empathetic AI companion
               trained to support your mental health 24/7. No stigma, no waiting,
@@ -92,7 +92,7 @@ const LandingPage = () => {
               </Link>
               <Link
                 to="/community"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-all font-bold text-lg active:scale-95"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-card hover:bg-border border border-border transition-all font-bold text-lg active:scale-95 text-foreground"
               >
                 Join Community
               </Link>
@@ -101,7 +101,7 @@ const LandingPage = () => {
         </section>
 
         {/* Stats Section */}
-        <section className="py-20 bg-slate-900/30 border-y border-slate-900">
+        <section className="py-20 bg-card/30 border-y border-border">
           <div className="max-w-7xl mx-auto px-6">
             <MotionDiv
               variants={containerVariants}
@@ -121,7 +121,7 @@ const LandingPage = () => {
                   key={i}
                   className="text-center"
                 >
-                  <div className="text-3xl md:text-4xl font-black text-white mb-2">
+                  <div className="text-3xl md:text-4xl font-black text-foreground mb-2">
                     {stat.value}
                   </div>
                   <div className="text-sm text-slate-500 uppercase tracking-widest font-bold">
@@ -140,7 +140,7 @@ const LandingPage = () => {
               <h2 className="text-3xl md:text-5xl font-black mb-6">
                 Designed for your wellness.
               </h2>
-              <p className="text-slate-400 max-w-xl mx-auto text-lg">
+              <p className="text-foreground/70 max-w-xl mx-auto text-lg">
                 We've combined clinical psychology with advanced AI to create a
                 platform that truly understands.
               </p>
@@ -188,16 +188,16 @@ const LandingPage = () => {
                 <MotionDiv
                   key={i}
                   whileHover={{ y: -10 }}
-                  className={`p-8 rounded-[2rem] bg-slate-900/50 border border-slate-800 backdrop-blur-sm relative overflow-hidden group`}
+                  className={`p-8 rounded-[2rem] bg-card border border-border backdrop-blur-sm relative overflow-hidden group`}
                 >
                   <div
                     className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${feature.gradient}`}
                   />
-                  <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-border/50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <feature.icon className="w-7 h-7 text-indigo-400" />
                   </div>
                   <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                  <p className="text-slate-400 leading-relaxed text-sm">
+                  <p className="text-foreground/70 leading-relaxed text-sm">
                     {feature.desc}
                   </p>
                 </MotionDiv>
@@ -219,15 +219,15 @@ const LandingPage = () => {
                     <Star key={i} className="w-5 h-5 fill-current" />
                   ))}
                 </div>
-                <p className="text-slate-300 font-bold text-xl">
+                <p className="text-foreground/80 font-bold text-xl">
                   — Sarah M., Early Beta User
                 </p>
               </div>
               <div className="flex gap-4">
-                <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center cursor-pointer hover:bg-slate-700 transition-colors">
+                <div className="w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center cursor-pointer hover:bg-border transition-colors text-foreground">
                   ←
                 </div>
-                <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center cursor-pointer hover:bg-slate-700 transition-colors">
+                <div className="w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center cursor-pointer hover:bg-border transition-colors text-foreground">
                   →
                 </div>
               </div>

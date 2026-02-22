@@ -17,7 +17,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-slate-900 text-white selection:bg-indigo-500/30 overflow-x-hidden">
+      <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 selection:bg-indigo-500/30 overflow-x-hidden">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />

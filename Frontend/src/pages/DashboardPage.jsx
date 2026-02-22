@@ -64,7 +64,7 @@ const DashboardPage = () => {
 
   return (
     <AuthenticatedLayout>
-      <div className="p-8 max-w-6xl mx-auto">
+      <div className="flex-1 overflow-y-auto p-8 max-w-6xl mx-auto w-full">
         {/* Welcome Section */}
         <div className="mb-12">
           <MotionDiv
@@ -79,11 +79,11 @@ const DashboardPage = () => {
                   {user?.name?.split(" ")[0] || "User"}
                 </span>
               </h1>
-              <p className="text-slate-400">
+              <p className="text-foreground/70">
                 Here's your wellness overview for today.
               </p>
             </div>
-            <div className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900 border border-slate-800">
+            <div className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-card border border-border">
               <Sun className="w-5 h-5 text-amber-400" />
               <span className="text-sm font-bold">18°C · Sunny in London</span>
             </div>
@@ -98,15 +98,15 @@ const DashboardPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="p-6 rounded-3xl bg-slate-900 border border-slate-800 hover:border-indigo-500/30 transition-all group"
+              className="p-6 rounded-3xl bg-card border border-border hover:border-indigo-500/30 transition-all group"
             >
               <stat.icon
                 className={`w-6 h-6 ${stat.color} mb-4 group-hover:scale-110 transition-transform`}
               />
-              <div className="text-3xl font-black text-white mb-1">
+              <div className="text-3xl font-black text-foreground mb-1">
                 {stat.value}
               </div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <div className="text-xs font-bold text-foreground/50 uppercase tracking-wider">
                 {stat.label}
               </div>
             </MotionDiv>
@@ -140,13 +140,13 @@ const DashboardPage = () => {
                 </Link>
                 <Link
                   to="/chat"
-                  className="p-8 rounded-[2rem] bg-slate-900 border border-slate-800 hover:border-indigo-500/30 transition-all group"
+                  className="p-8 rounded-[2rem] bg-card border border-border hover:border-indigo-500/30 transition-all group"
                 >
                   <Zap className="w-8 h-8 text-emerald-400 mb-4" />
-                  <h3 className="text-xl font-bold text-white mb-2">
+                  <h3 className="text-xl font-bold text-foreground mb-2">
                     Morning Check-in
                   </h3>
-                  <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                  <p className="text-foreground/70 text-sm leading-relaxed mb-6">
                     A quick 2-minute chat with Healo to set your day's
                     intention.
                   </p>
@@ -159,9 +159,9 @@ const DashboardPage = () => {
 
             <section>
               <h2 className="text-xl font-bold mb-6">Recent Insights</h2>
-              <div className="p-8 rounded-[2.5rem] bg-slate-900/50 border border-slate-800 border-dashed">
+              <div className="p-8 rounded-[2.5rem] bg-card border border-border border-dashed">
                 <div className="text-center py-8">
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-foreground/50 text-sm">
                     You haven't logged enough data this week to generate
                     detailed insights.
                   </p>
@@ -183,16 +183,16 @@ const DashboardPage = () => {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 + i * 0.1 }}
-                  className="flex items-center gap-4 p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:bg-slate-800 transition-all"
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:bg-border transition-all"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-slate-950 flex items-center justify-center text-xl shadow-inner">
+                  <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center text-xl shadow-inner">
                     {activity.emoji}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-white truncate">
+                    <h4 className="text-sm font-bold text-foreground truncate">
                       {activity.title}
                     </h4>
-                    <p className="text-[10px] text-slate-500 uppercase font-black">
+                    <p className="text-[10px] text-foreground/50 uppercase font-black">
                       {activity.type} · {activity.time}
                     </p>
                   </div>
@@ -200,7 +200,7 @@ const DashboardPage = () => {
               ))}
               <Link
                 to="/community"
-                className="block text-center p-4 rounded-2xl border border-slate-800 text-slate-500 text-xs font-bold hover:text-white transition-all"
+                className="block text-center p-4 rounded-2xl border border-border text-foreground/50 text-xs font-bold hover:text-foreground transition-all"
               >
                 View Full History
               </Link>

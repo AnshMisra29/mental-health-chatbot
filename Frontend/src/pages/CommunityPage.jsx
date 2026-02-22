@@ -71,14 +71,14 @@ const CommunityPage = () => {
 
   return (
     <AuthenticatedLayout>
-      <div className="p-8 max-w-6xl mx-auto">
+      <div className="flex-1 overflow-y-auto p-8 max-w-6xl mx-auto w-full">
         {/* Welcome Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <h1 className="text-3xl font-black mb-2">
               Mental Health Awareness
             </h1>
-            <p className="text-slate-400">
+            <p className="text-foreground/70">
               Discover tips, stories, and tools to help you thrive.
             </p>
           </div>
@@ -96,7 +96,7 @@ const CommunityPage = () => {
         </div>
 
         {/* Mood Tracker Widget */}
-        <section className="mb-12 p-8 rounded-[2.5rem] bg-slate-900 border border-slate-800">
+        <section className="mb-12 p-8 rounded-[2.5rem] bg-card border border-border">
           <h2 className="text-xl font-bold mb-6">How are you feeling today?</h2>
           <div className="flex flex-wrap gap-4">
             {[
@@ -136,12 +136,12 @@ const CommunityPage = () => {
                     }),
                   )
                 }
-                className={`flex-1 min-w-[100px] p-4 rounded-2xl bg-slate-950 border border-slate-800 transition-all flex flex-col items-center gap-2 group ${mood.color}`}
+                className={`flex-1 min-w-[100px] p-4 rounded-2xl bg-background border border-border transition-all flex flex-col items-center gap-2 group ${mood.color}`}
               >
                 <span className="text-2xl group-hover:scale-125 transition-transform">
                   {mood.emoji}
                 </span>
-                <span className="text-xs font-bold text-slate-500 group-hover:text-white uppercase tracking-wider">
+                <span className="text-xs font-bold text-foreground/50 group-hover:text-foreground uppercase tracking-wider">
                   {mood.label}
                 </span>
               </button>
@@ -195,7 +195,7 @@ const CommunityPage = () => {
               className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${
                 activeTab === tab
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                  : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+                  : "bg-card text-foreground/70 hover:text-foreground border border-border"
               }`}
             >
               {tab}
@@ -215,7 +215,7 @@ const CommunityPage = () => {
               onClick={() =>
                 dispatch(openModal({ type: "resource", data: resource }))
               }
-              className="p-8 rounded-[2rem] bg-slate-900 border border-slate-800 hover:border-indigo-500/30 transition-all group cursor-pointer hover:bg-slate-800/50"
+              className="p-8 rounded-[2rem] bg-card border border-border hover:border-indigo-500/30 transition-all group cursor-pointer hover:bg-border/50"
             >
               <div className="flex items-center justify-between mb-6">
                 <div
@@ -223,7 +223,7 @@ const CommunityPage = () => {
                 >
                   {resource.type}
                 </div>
-                <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
+                <div className="flex items-center gap-2 text-foreground/50 text-xs font-medium">
                   <Clock className="w-3.5 h-3.5" />
                   {resource.readTime}
                 </div>
@@ -231,8 +231,8 @@ const CommunityPage = () => {
               <h3 className="text-xl font-bold mb-4 group-hover:text-indigo-400 transition-colors">
                 {resource.title}
               </h3>
-              <div className="flex items-center justify-between mt-8 pt-8 border-t border-slate-800/50">
-                <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
+              <div className="flex items-center justify-between mt-8 pt-8 border-t border-border">
+                <div className="flex items-center gap-4 text-xs font-bold text-foreground/50">
                   <span className="flex items-center gap-1.5 hover:text-rose-400 transition-colors">
                     <Heart className="w-4 h-4" /> {resource.likes}
                   </span>
