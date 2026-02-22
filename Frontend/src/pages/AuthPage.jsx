@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, User, ArrowRight, Github, Heart } from "lucide-react";
-import { setUser, setLoading } from "../features/auth/authSlice";
+import { login, register, clearError } from "../features/auth/authSlice";
 
 const MotionDiv = motion.div;
 
@@ -14,26 +14,28 @@ const AuthPage = () => {
     password: "",
     fullName: "",
   });
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading } = useSelector((state) => state.auth);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(setLoading(true));
-
-    // Simulate API Call
-    setTimeout(() => {
-      dispatch(
-        setUser({ name: formData.fullName || "User", email: formData.email }),
-      );
-      dispatch(setLoading(false));
-      navigate("/dashboard");
-    }, 1500);
+    if (isLogin) {
+      const result = await dispatch(login({ email: formData.email, password: formData.password }));
+      if (login.fulfilled.match(result)) {
+        navigate("/dashboard");
+      }
+    } else {
+      const result = await dispatch(register(formData));
+      if (register.fulfilled.match(result)) {
+        navigate("/dashboard");
+      }
+    }
   };
 
+  const { error: authError, loading } = useSelector((state) => state.auth);
+
   const handleChange = (e) => {
+    if (authError) dispatch(clearError());
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -74,21 +76,35 @@ const AuthPage = () => {
           <div className="flex p-1 bg-background rounded-2xl mb-8 border border-border">
             <button
               onClick={() => setIsLogin(true)}
+<<<<<<< HEAD
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
                 isLogin
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                   : "text-foreground/50 hover:text-foreground"
               }`}
+=======
+              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${isLogin
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                : "text-slate-500 hover:text-white"
+                }`}
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
             >
               Login
             </button>
             <button
               onClick={() => setIsLogin(false)}
+<<<<<<< HEAD
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
                 !isLogin
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                   : "text-foreground/50 hover:text-foreground"
               }`}
+=======
+              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${!isLogin
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                : "text-slate-500 hover:text-white"
+                }`}
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
             >
               Register
             </button>
@@ -144,6 +160,12 @@ const AuthPage = () => {
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-background border border-border focus:outline-none focus:border-indigo-500/50 transition-all text-sm group-hover:border-foreground/20 text-foreground"
               />
             </div>
+
+            {authError && (
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold text-center">
+                {authError}
+              </div>
+            )}
 
             {isLogin && (
               <div className="text-right">

@@ -75,7 +75,7 @@ const LandingPage = () => {
               variants={itemVariants}
               className="text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto mb-10 leading-relaxed"
             >
-              Healo is more than a chatbot. It's an empathetic AI companion
+              Sia is more than a chatbot. It's an empathetic AI companion
               trained to support your mental health 24/7. No stigma, no waiting,
               just help when you need it.
             </MotionP>
@@ -151,7 +151,7 @@ const LandingPage = () => {
                 {
                   icon: MessageCircle,
                   title: "Empathetic Chat",
-                  desc: "Healo uses proven therapeutic techniques to help you navigate your emotions without judgment.",
+                  desc: "Sia uses proven therapeutic techniques to help you navigate your emotions without judgment.",
                   gradient: "from-indigo-500/20 to-transparent",
                 },
                 {
@@ -163,12 +163,13 @@ const LandingPage = () => {
                 {
                   icon: Users,
                   title: "Peer Community",
+                  author: "Sia Guide",
                   desc: "Connect with a global community. Share stories, find support, and realize you're not alone.",
                   gradient: "from-blue-500/20 to-transparent",
                 },
                 {
                   icon: Zap,
-                  title: "Instant Support",
+                  title: "My Journey with Sia: A Story of Growth",
                   desc: "No appointments needed. Get crisis support and immediate coping strategies in seconds.",
                   gradient: "from-amber-500/20 to-transparent",
                 },
@@ -181,7 +182,7 @@ const LandingPage = () => {
                 {
                   icon: CheckCircle2,
                   title: "Better Results",
-                  desc: "Regular interaction with Healo is proven to reduce stress and improve emotional clarity.",
+                  desc: "Regular interaction with Sia is proven to reduce stress and improve emotional clarity.",
                   gradient: "from-violet-500/20 to-transparent",
                 },
               ].map((feature, i) => (
@@ -212,7 +213,7 @@ const LandingPage = () => {
             <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
               <div className="max-w-xl">
                 <h2 className="text-3xl md:text-5xl font-black mb-6 italic">
-                  "Healo changed my life when I had nobody to talk to."
+                  "Sia changed my life when I had nobody to talk to."
                 </h2>
                 <div className="flex gap-1 text-amber-400 mb-4">
                   {[...Array(5)].map((_, i) => (

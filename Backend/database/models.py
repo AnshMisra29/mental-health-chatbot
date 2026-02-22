@@ -49,10 +49,11 @@ class ChatHistory(db.Model):
     user_id      = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     message      = db.Column(db.Text, nullable=False)
     bot_response = db.Column(db.Text, nullable=False)
-    sentiment    = db.Column(db.String(50))
-    emotion      = db.Column(db.String(50))
-    risk_level   = db.Column(db.String(50))
-    timestamp    = db.Column(db.DateTime, default=datetime.utcnow)
+    sentiment      = db.Column(db.String(50))
+    emotion        = db.Column(db.String(50))
+    risk_level     = db.Column(db.String(50))
+    model_metadata = db.Column(db.JSON)  # Stores raw multi-class scores
+    timestamp      = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f"<ChatHistory user_id={self.user_id} at {self.timestamp}>"
