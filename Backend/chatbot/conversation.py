@@ -2,6 +2,7 @@ import os
 import warnings
 from groq import Groq
 from dotenv import load_dotenv
+from ml_engine.inference.model_loader import model_loader
 from ml_engine.inference.predictor import predictor
 from chatbot.context_manager import context_manager
 from alerts.alert_service import create_alert
@@ -28,7 +29,20 @@ def get_chatbot_response(user_id, message):
     2. Check for crisis; if found, log alert and return safety response.
     3. If no crisis, use Groq (Llama 3) to generate an empathetic response.
     """
-    
+    # JWT identity is always a string — cast to int for DB Integer FK columns
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        user_id = None
+
+    # Check if model is ready
+    if not model_loader.is_ready:
+        return {
+            "response": "I'm just finishing my morning coffee (still booting up), but I'm here to listen! How can I help you today?",
+            "emotion": "Normal",
+            "is_crisis": False
+        }
+
     # 1. Classification
     analysis = predictor.predict(message)
     detected_emotion = analysis['label']

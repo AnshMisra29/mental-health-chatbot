@@ -178,7 +178,7 @@ const AuthPage = () => {
               className="w-full py-6 rounded-[2rem] bg-gradient-to-br from-cyan-600 to-sky-600 hover:from-cyan-400 hover:to-sky-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all font-black uppercase tracking-widest text-xs text-white shadow-xl shadow-cyan-500/20 flex items-center justify-center gap-3 active:scale-95"
             >
               {loading ? (
-                <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-6 h-6 border-[3px] border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   {isLogin ? "Sign In" : "Create Account"}

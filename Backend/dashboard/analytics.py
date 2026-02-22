@@ -39,11 +39,17 @@ def get_user_summary(user_id: int) -> dict:
         .scalar() or 0
     )
 
+    none_alerts = (
+        db.session.query(func.count(AlertLog.id))
+        .filter(AlertLog.user_id == user_id, AlertLog.risk_level == "none")
+        .scalar() or 0
+    )
+
     return {
         "total_chats":    total_chats,
         "total_alerts":   total_alerts,
         "high_alerts":    high_alerts,
-        "none_alerts":    total_alerts - high_alerts, # Derived logic
+        "none_alerts":    none_alerts,
     }
 
 

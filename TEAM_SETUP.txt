@@ -1,0 +1,437 @@
+================================================================================
+  InfiHeal — Mental Health Chatbot
+  TEAM SETUP GUIDE
+  Last updated: 2026-02-22
+================================================================================
+
+This document covers everything a new team member needs to do after cloning this
+repository to get the project running locally — including the backend server,
+frontend dev server, database, API keys, and how to safely make frontend changes.
+
+================================================================================
+  TABLE OF CONTENTS
+================================================================================
+
+  1. Prerequisites
+  2. Clone & Repository Structure
+  3. Backend Setup (Flask + SQLite)
+  4. Environment Variables & API Keys
+  5. Database Initialization
+  6. Frontend Setup (React + Vite)
+  7. Running the Full Project
+  8. Making Frontend Changes
+  9. Troubleshooting
+
+================================================================================
+  1. PREREQUISITES
+================================================================================
+
+Before starting, make sure you have the following installed on your machine.
+
+  [Required]
+  - Python 3.9 or newer       https://www.python.org/downloads/
+  - Node.js 18 or newer       https://nodejs.org/en/download
+  - Git                       https://git-scm.com/downloads
+
+  [Optional but recommended]
+  - VS Code                   https://code.visualstudio.com/
+  - PowerShell 7+ (Windows)   (default on Windows 10/11 is fine)
+
+  Verify your versions by running:
+    python --version
+    node --version
+    npm --version
+    git --version
+
+
+================================================================================
+  2. CLONE & REPOSITORY STRUCTURE
+================================================================================
+
+  Clone the repository:
+    git clone https://github.com/AnshMisra29/mental-health-chatbot.git
+    cd mental-health-chatbot
+
+  Project layout:
+    mental-health-chatbot/
+    ├── Backend/                 <-- Flask API server
+    │   ├── app.py               Main server entry point
+    │   ├── auth/                Authentication routes (login, register, /me)
+    │   ├── chatbot/             Chatbot logic & Groq AI integration
+    │   ├── dashboard/           Analytics endpoints
+    │   ├── alerts/              Crisis alert system
+    │   ├── database/            SQLAlchemy models & DB setup
+    │   ├── ml_engine/           DistilBERT emotion classifier
+    │   ├── migrations/          Flask-Migrate DB migration files
+    │   ├── requirements.txt     Python dependencies
+    │   ├── .env.example         Template for environment variables (see §4)
+    │   └── .env                 YOUR local secrets — NOT committed to git
+    │
+    ├── Frontend/                <-- React + Vite app
+    │   ├── src/
+    │   │   ├── App.jsx          Route definitions
+    │   │   ├── pages/           One file per page (LandingPage, ChatPage, etc.)
+    │   │   ├── features/        Redux slices (auth, chat, ui)
+    │   │   ├── components/      Shared components (layout, navbar, etc.)
+    │   │   └── services/api.js  Axios instance — all API calls go through here
+    │   ├── index.html
+    │   ├── vite.config.js
+    │   └── package.json
+    │
+    ├── start_project.ps1        One-click startup script (Windows PowerShell)
+    └── TEAM_SETUP.txt           This file
+
+
+================================================================================
+  3. BACKEND SETUP
+================================================================================
+
+  Step 1 — Navigate to the Backend folder:
+    cd Backend
+
+  Step 2 — Create a Python virtual environment:
+    python -m venv venv
+
+  Step 3 — Activate the virtual environment:
+
+    Windows (PowerShell):
+      .\venv\Scripts\Activate.ps1
+
+    Windows (CMD):
+      venv\Scripts\activate.bat
+
+    macOS / Linux:
+      source venv/bin/activate
+
+    You'll see (venv) at the start of your prompt when active.
+
+  Step 4 — Install all Python dependencies:
+    pip install -r requirements.txt
+
+  NOTE: This project uses PyTorch and Transformers (HuggingFace) for the
+  emotion classification ML model. The first install may take a few minutes
+  depending on your internet speed (~1-2 GB total).
+
+  NOTE for Windows users: If `torch` fails to install, try:
+    pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+
+================================================================================
+  4. ENVIRONMENT VARIABLES & API KEYS
+================================================================================
+
+  The backend requires a .env file to store secret keys and configuration.
+  This file is NEVER committed to Git (it's in .gitignore).
+
+  Step 1 — Create your .env file from the template:
+
+    Windows PowerShell:
+      Copy-Item .env.example .env
+
+    macOS / Linux:
+      cp .env.example .env
+
+  Step 2 — Open .env in any text editor and fill in your values:
+
+    SECRET_KEY=<any long random string>
+    JWT_SECRET_KEY=<any different long random string>
+    FLASK_APP=app.py
+    FLASK_ENV=development
+    DATABASE_URL=sqlite:///mental_health.db
+    GROQ_API_KEY=<your personal Groq API key>
+
+  How to get your SECRET_KEY and JWT_SECRET_KEY:
+    You can generate secure random keys using Python:
+      python -c "import secrets; print(secrets.token_hex(32))"
+    Run this twice to get two different keys.
+
+  How to get your GROQ_API_KEY:
+    1. Go to https://console.groq.com
+    2. Sign up for a free account
+    3. Navigate to API Keys → Create API Key
+    4. Copy the key (it starts with "gsk_")
+    5. Paste it as the value for GROQ_API_KEY in your .env file
+
+  IMPORTANT: Never share your .env file, commit it to Git, or paste keys in
+  any team chat. Every team member gets their own free Groq API key.
+
+
+================================================================================
+  5. DATABASE INITIALIZATION
+================================================================================
+
+  The project uses SQLite (a local file-based database). Each developer has
+  their own separate database file that is never committed to Git.
+
+  Run these commands from inside the Backend/ folder with (venv) activated:
+
+  Step 1 — Initialize the migrations folder (only needed once per machine):
+    flask db init
+
+    NOTE: If you see "Error: Directory migrations already exists", skip this
+    step — migrations/ is already committed, just proceed to Step 2.
+
+  Step 2 — Apply all existing migrations to create your local database:
+    flask db upgrade
+
+    This creates a file at: Backend/instance/mental_health.db
+
+  After this, your database will have 3 tables:
+    - users          (accounts)
+    - chat_history   (all conversation messages)
+    - alert_log      (crisis detection events)
+
+  IMPORTANT: The database file is local to your machine only. You will NOT
+  share data with other team members — everyone starts with an empty DB and
+  registers their own test accounts.
+
+  If the schema changes (a teammate adds a column):
+    After pulling the latest code, run:
+      flask db upgrade
+    This will safely apply any new migrations without destroying your data.
+
+
+================================================================================
+  6. FRONTEND SETUP
+================================================================================
+
+  Step 1 — Navigate to the Frontend folder (in a NEW terminal tab/window):
+    cd Frontend
+
+  Step 2 — Install all Node.js dependencies:
+    npm install
+
+  This installs everything listed in package.json, including:
+    - React 19, React Router DOM, Redux Toolkit
+    - Framer Motion (animations)
+    - Lucide React (icons)
+    - Axios (HTTP requests)
+    - Tailwind CSS v4 via @tailwindcss/vite
+    - Vite (build tool/dev server)
+
+  You only need to run npm install once (or again when package.json changes).
+
+
+================================================================================
+  7. RUNNING THE FULL PROJECT
+================================================================================
+
+  OPTION A — One-click script (Recommended, Windows only):
+  ─────────────────────────────────────────────────────────
+  From the root of the repo (mental-health-chatbot/), run:
+    .\start_project.ps1
+
+  This will:
+    1. Kill any processes on ports 5000 and 5173
+    2. Start the Flask backend in a separate PowerShell window
+    3. Start the Vite frontend in another separate window
+
+  If PowerShell blocks the script, run this once to allow local scripts:
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+
+  OPTION B — Manual startup (two terminal windows):
+  ──────────────────────────────────────────────────
+  Terminal 1 — Backend:
+    cd Backend
+    .\venv\Scripts\Activate.ps1     (or source venv/bin/activate on macOS/Linux)
+    python app.py
+
+  Terminal 2 — Frontend:
+    cd Frontend
+    npm run dev
+
+
+  Once both are running, open your browser:
+    Frontend:     http://localhost:5173
+    Backend API:  http://localhost:5000
+    API Health:   http://localhost:5000/api/health
+    API Status:   http://localhost:5000/api/status   (shows ML model readiness)
+
+  NOTE: The ML emotion classifier (DistilBERT) loads in the background when
+  the backend starts. The first message you send may return a warm-up response
+  while it loads (~30-60 seconds on first run). Subsequent messages will be
+  classified correctly. Watch the backend terminal for "Model loaded" logs.
+
+
+================================================================================
+  8. MAKING FRONTEND CHANGES
+================================================================================
+
+  Tech stack: React 19, Vite, Tailwind CSS v4, Redux Toolkit, Framer Motion
+
+  ── Development Workflow ────────────────────────────────────────────────────
+
+  1. Make sure the Vite dev server is running:
+       cd Frontend
+       npm run dev
+
+  2. Open http://localhost:5173 in your browser.
+
+  3. Edit any file in Frontend/src/ — Vite will hot-reload the browser
+     automatically. You do NOT need to restart the server for most changes.
+
+  4. The backend must also be running for API calls (login, chat, dashboard)
+     to work. Only static UI changes (colors, layout, fonts) work without it.
+
+  ── File Map: Where to Put What ─────────────────────────────────────────────
+
+  New page?
+    → Create a new file in Frontend/src/pages/
+    → Add a <Route> for it in Frontend/src/App.jsx
+    → If it requires login, wrap it: <ProtectedRoute><YourPage /></ProtectedRoute>
+
+  New reusable component?
+    → Add it to Frontend/src/components/
+
+  New API call?
+    → All API calls MUST go through Frontend/src/services/api.js
+    → The api.js Axios instance automatically attaches the JWT token
+    → NEVER use raw `fetch()` or create a new Axios instance — use import api
+
+  New Redux state (global state)?
+    → Add a new slice in Frontend/src/features/yourFeature/yourSlice.js
+    → Register it in Frontend/src/app/store.js under the `reducer` key
+
+  Styling?
+    → This project uses Tailwind CSS v4. Use Tailwind utility classes directly
+      in your JSX className attributes.
+    → Global styles go in Frontend/src/index.css
+    → Do NOT use Tailwind v3 arbitrary property syntax like [border-3]
+    → For arbitrary values use the bracket syntax: border-[3px], w-[120px] etc.
+
+  ── Routing Rules ───────────────────────────────────────────────────────────
+
+  Public routes (no login required):
+    /         Landing page
+    /auth     Login / Register
+
+  Protected routes (must be logged in):
+    /dashboard, /chat, /community, /help
+    → Wrapped with <ProtectedRoute> in App.jsx
+    → If not logged in, user is redirected to /auth automatically
+
+  ── Adding a New Protected Page — Example ──────────────────────────────────
+
+  1. Create Frontend/src/pages/MyNewPage.jsx:
+       import AuthenticatedLayout from "../components/AuthenticatedLayout";
+       const MyNewPage = () => (
+         <AuthenticatedLayout>
+           <div className="p-8">My new page content</div>
+         </AuthenticatedLayout>
+       );
+       export default MyNewPage;
+
+  2. Import and add a Route in App.jsx:
+       import MyNewPage from "./pages/MyNewPage";
+       // Inside <Routes>:
+       <Route path="/mynewpage" element={
+         <ProtectedRoute><MyNewPage /></ProtectedRoute>
+       } />
+
+  3. Link to it from anywhere using React Router:
+       import { Link } from "react-router-dom";
+       <Link to="/mynewpage">Go to My Page</Link>
+
+  ── Build for Production ────────────────────────────────────────────────────
+
+  To create a production build (optimized static files):
+    cd Frontend
+    npm run build
+
+  Output goes to Frontend/dist/. Only do this to verify there are no build
+  errors. For local dev, always use npm run dev instead.
+
+  ── Git Workflow for Frontend Changes ───────────────────────────────────────
+
+  1. Pull latest changes before starting work:
+       git pull origin main
+
+  2. Make your changes in Frontend/src/
+
+  3. Stage and commit:
+       git add Frontend/src/path/to/changed/file.jsx
+       git commit -m "feat: describe what you changed"
+
+  4. Push:
+       git push origin main
+
+  NOTE: Never commit Frontend/dist/ (the build output) — it is gitignored.
+  Never commit node_modules/ — it is gitignored.
+
+
+================================================================================
+  9. TROUBLESHOOTING
+================================================================================
+
+  ── Backend Won't Start ─────────────────────────────────────────────────────
+
+  "ModuleNotFoundError":
+    → Make sure your venv is activated (you should see (venv) in your prompt)
+    → Run: pip install -r requirements.txt
+
+  "FLASK_APP not set" error:
+    → Make sure your .env file exists in the Backend/ folder
+    → Run: cd Backend, then python app.py (not flask run from root)
+
+  Database errors on startup:
+    → Run: flask db upgrade  (from inside Backend/ with venv activated)
+
+  Port 5000 already in use:
+    Windows: netstat -ano | findstr :5000
+    Then:    taskkill /PID <PID> /F
+
+  ── Frontend Won't Start ────────────────────────────────────────────────────
+
+  "Cannot find module ...":
+    → Run: cd Frontend && npm install
+
+  Port 5173 already in use:
+    Windows: netstat -ano | findstr :5173
+    Then:    taskkill /PID <PID> /F
+
+  Blank white page with no content:
+    → Open browser DevTools (F12) → Console tab — check for red errors
+    → Make sure the backend is also running on port 5000
+    → Hard refresh the page: Ctrl+Shift+R
+
+  ── API / Authentication Issues ─────────────────────────────────────────────
+
+  "401 Unauthorized" on all requests:
+    → Log out and log back in to get a fresh JWT token
+    → Clear localStorage in DevTools → Application → Local Storage → Clear All
+
+  "CORS error" in browser console:
+    → The backend has CORS enabled for all origins in dev mode
+    → Make sure you're accessing the frontend via http://localhost:5173
+      not via a file:// path
+
+  "Groq API error" in backend logs:
+    → Check your GROQ_API_KEY in Backend/.env is correct
+    → Verify at https://console.groq.com that your key hasn't been rotated
+    → Free tier has rate limits — wait a moment and try again
+
+  ── ML Model Takes Long to Load ─────────────────────────────────────────────
+
+  The DistilBERT model downloads from HuggingFace on first run (~260 MB).
+  Subsequent runs load from local cache (~5-10 seconds).
+  Watch for "Model loaded successfully" in the backend terminal.
+  While loading, the chatbot sends a friendly "still booting up" response.
+
+
+================================================================================
+  QUICK REFERENCE
+================================================================================
+
+  Start backend:   cd Backend && .\venv\Scripts\Activate.ps1 && python app.py
+  Start frontend:  cd Frontend && npm run dev
+  Start both:      .\start_project.ps1  (from repo root, Windows only)
+
+  Frontend URL:    http://localhost:5173
+  Backend URL:     http://localhost:5000
+  API health:      http://localhost:5000/api/health
+
+  Apply DB schema: cd Backend && flask db upgrade
+  Get Groq key:    https://console.groq.com
+
+================================================================================
