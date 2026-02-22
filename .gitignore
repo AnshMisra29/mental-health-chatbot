@@ -42,3 +42,22 @@ notebooks/
 .vscode/
 .idea/
 .DS_Store
+
+# Test outputs, logs & ad-hoc scripts
+*_log.txt
+*_output.txt
+output.txt
+clean_results.txt
+verify_final.txt
+test_out*.txt
+heavy_test_results*.txt
+frontend_check.html
+check_db.py
+test_clean.py
+test_direct.py
+test_groq.py
+test_model.py
+test_backend_heavy.py
+verify_predictor.py
+start_project.ps1
+TEAM_SETUP.txt

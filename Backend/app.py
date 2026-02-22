@@ -1,4 +1,5 @@
 import os
+os.environ["OMP_NUM_THREADS"] = "1"
 from flask import Flask, jsonify
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -34,14 +35,44 @@ app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(chatbot_bp,   url_prefix="/api/chat")
 
 # ── Load ML Model ─────────────────────────────────────────────────────────────
-from ml_engine.inference.model_loader import load_model
-# Load model once when Flask starts
-load_model()
+from ml_engine.inference.model_loader import load_model_async, model_loader
+# Load model in background so Flask starts instantly
+load_model_async()
+
+# ── Root route ────────────────────────────────────────────────────────────────
+@app.route('/')
+def index():
+    return jsonify({
+        "status": "online",
+        "message": "Mental Health Chatbot API is running",
+        "model_ready": model_loader.is_ready,
+        "endpoints": {
+            "health": "/api/health",
+            "status": "/api/status",
+            "chat": "/api/chat/message",
+            "auth": "/api/auth/*",
+            "alerts": "/api/alerts/*",
+            "dashboard": "/api/dashboard/*"
+        }
+    })
+
+# ── Status check ──────────────────────────────────────────────────────────────
+@app.route('/api/status')
+def status():
+    return jsonify({
+        "ready": model_loader.is_ready,
+        "device": str(model_loader.device),
+        "error": model_loader.error
+    })
 
 # ── Health check ──────────────────────────────────────────────────────────────
 @app.route('/api/health')
 def health():
-    return jsonify({"status": "ok", "message": "Mental Health Chatbot API is running"})
+    return jsonify({
+        "status": "ok", 
+        "message": "Mental Health Chatbot API is running",
+        "model_ready": model_loader.is_ready
+    })
 
 # ── 404 / 500 JSON error handlers ─────────────────────────────────────────────
 @app.errorhandler(404)
@@ -53,4 +84,4 @@ def server_error(e):
     return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", use_reloader=False)
