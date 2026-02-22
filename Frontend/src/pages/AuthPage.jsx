@@ -77,16 +77,22 @@ const AuthPage = () => {
             <button
               onClick={() => setIsLogin(true)}
 <<<<<<< HEAD
+<<<<<<< HEAD
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
                 isLogin
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                   : "text-foreground/50 hover:text-foreground"
               }`}
 =======
+=======
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${isLogin
                 ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                 : "text-slate-500 hover:text-white"
                 }`}
+<<<<<<< HEAD
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
+=======
 >>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
             >
               Login
@@ -94,16 +100,22 @@ const AuthPage = () => {
             <button
               onClick={() => setIsLogin(false)}
 <<<<<<< HEAD
+<<<<<<< HEAD
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
                 !isLogin
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                   : "text-foreground/50 hover:text-foreground"
               }`}
 =======
+=======
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${!isLogin
                 ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                 : "text-slate-500 hover:text-white"
                 }`}
+<<<<<<< HEAD
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
+=======
 >>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
             >
               Register

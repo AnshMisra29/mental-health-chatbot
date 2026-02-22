@@ -72,7 +72,11 @@ const ChatPage = () => {
             </div>
             <div>
 <<<<<<< HEAD
+<<<<<<< HEAD
               <h2 className="text-sm font-black text-foreground">Healo AI</h2>
+=======
+              <h2 className="text-sm font-black text-white">Sia AI</h2>
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
 =======
               <h2 className="text-sm font-black text-white">Sia AI</h2>
 >>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
@@ -103,8 +107,13 @@ const ChatPage = () => {
                 Welcome, {user?.name || "Friend"}
               </h3>
 <<<<<<< HEAD
+<<<<<<< HEAD
               <p className="text-foreground/60 text-sm leading-relaxed">
                 I'm Healo, your personal AI companion. I'm here to listen,
+=======
+              <p className="text-slate-400 text-sm leading-relaxed">
+                I'm Sia, your personal AI companion. I'm here to listen,
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
 =======
               <p className="text-slate-400 text-sm leading-relaxed">
                 I'm Sia, your personal AI companion. I'm here to listen,
@@ -139,16 +148,22 @@ const ChatPage = () => {
               >
                 <div
 <<<<<<< HEAD
+<<<<<<< HEAD
                   className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 ${
                     msg.sender === "user"
                       ? "bg-indigo-500/20 text-indigo-500"
                       : "bg-border text-foreground/50"
                   }`}
 =======
+=======
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
                   className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 ${msg.sender === "user"
                     ? "bg-indigo-500/20 text-indigo-400"
                     : "bg-slate-800 text-slate-400"
                     }`}
+<<<<<<< HEAD
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
+=======
 >>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
                 >
                   {msg.sender === "user" ? (
@@ -159,6 +174,7 @@ const ChatPage = () => {
                 </div>
                 <div className="max-w-[75%] space-y-1">
                   <div
+<<<<<<< HEAD
 <<<<<<< HEAD
                     className={`px-5 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
                       msg.sender === "user"
@@ -179,6 +195,15 @@ const ChatPage = () => {
                   >
                     {msg.text}
                   </div>
+=======
+                    className={`px-5 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.sender === "user"
+                      ? "bg-indigo-600 text-white rounded-tr-none"
+                      : "bg-slate-900 border border-slate-800 text-slate-300 rounded-tl-none"
+                      }`}
+                  >
+                    {msg.text}
+                  </div>
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
                   <div className="flex items-center gap-2 px-1">
                     <p className="text-[10px] font-bold text-slate-600">
                       {msg.timestamp}
@@ -189,6 +214,9 @@ const ChatPage = () => {
                       </span>
                     )}
                   </div>
+<<<<<<< HEAD
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
+=======
 >>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
                 </div>
               </MotionDiv>
@@ -247,8 +275,13 @@ const ChatPage = () => {
             </div>
           </form>
 <<<<<<< HEAD
+<<<<<<< HEAD
           <p className="text-center text-[10px] text-foreground/40 mt-4 font-bold uppercase tracking-widest">
             Healo AI can make mistakes. Consider checking important info.
+=======
+          <p className="text-center text-[10px] text-slate-600 mt-4 font-bold uppercase tracking-widest">
+            Sia AI can make mistakes. Consider checking important info.
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
 =======
           <p className="text-center text-[10px] text-slate-600 mt-4 font-bold uppercase tracking-widest">
             Sia AI can make mistakes. Consider checking important info.

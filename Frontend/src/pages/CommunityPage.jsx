@@ -195,8 +195,13 @@ const CommunityPage = () => {
               className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
 <<<<<<< HEAD
+<<<<<<< HEAD
                   : "bg-card text-foreground/70 hover:text-foreground border border-border"
               }`}
+=======
+                  : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+                }`}
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
 =======
                   : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
                 }`}

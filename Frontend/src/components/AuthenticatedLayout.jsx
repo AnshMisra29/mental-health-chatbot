@@ -54,9 +54,14 @@ const AuthenticatedLayout = ({ children }) => {
       {/* Sidebar */}
       <aside
 <<<<<<< HEAD
+<<<<<<< HEAD
         className={`fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+=======
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
 =======
         className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
@@ -95,8 +100,13 @@ const AuthenticatedLayout = ({ children }) => {
                   className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 active:scale-95 ${isActive
                       ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20"
 <<<<<<< HEAD
+<<<<<<< HEAD
                       : "text-foreground/70 hover:text-foreground hover:bg-border"
                   }`}
+=======
+                      : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    }`}
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
 =======
                       : "text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
@@ -240,8 +250,13 @@ const AuthenticatedLayout = ({ children }) => {
                 <Heart className="w-6 h-6 text-indigo-500" />
               </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
               <h2 className="text-2xl font-bold text-foreground mb-2">
                 {modal.data?.title || "Healo Support"}
+=======
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {modal.data?.title || "Sia Support"}
+>>>>>>> 90286d23ac835df98df3b46ed8fce0f4959018f4
 =======
               <h2 className="text-2xl font-bold text-white mb-2">
                 {modal.data?.title || "Sia Support"}
