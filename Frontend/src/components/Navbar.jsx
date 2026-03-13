@@ -41,7 +41,7 @@ const Navbar = () => {
             <Heart className="w-6 h-6 text-white fill-current" />
           </div>
           <span className="text-2xl font-black font-heading tracking-tighter">
-            InfiHeal
+            Aurora
           </span>
         </Link>
 

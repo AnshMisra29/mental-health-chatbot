@@ -14,8 +14,13 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 load_dotenv() # Load environment variables from .env
 
-# Initialize Groq Client
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+# Initialize Groq Client only if API key is present (avoid crash when missing)
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+if GROQ_API_KEY:
+    client = Groq(api_key=GROQ_API_KEY)
+else:
+    client = None
+    print("WARNING: GROQ_API_KEY not set — Groq client disabled; using fallback responses.")
 
 # Use Llama 3 for best quality-to-speed ratio
 MODEL_ID = "llama-3.3-70b-versatile"

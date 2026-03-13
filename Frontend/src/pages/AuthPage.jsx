@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, User, ArrowRight, GithubIcon, Heart } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Heart } from "lucide-react";
 import { login, register, clearError } from "../features/auth/authSlice";
 
 const MotionDiv = motion.div;
+const MotionButton = motion.button;
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -61,7 +62,7 @@ const AuthPage = () => {
               <Heart className="w-8 h-8 text-white fill-current" />
             </div>
             <span className="text-4xl font-black font-heading tracking-tighter">
-              InfiHeal
+              Aurora
             </span>
           </Link>
           <h2 className="text-4xl md:text-5xl font-black text-foreground font-heading tracking-tight mb-4 leading-tight">

@@ -18,7 +18,7 @@ import { logout } from "../features/auth/authSlice";
 import ThemeToggle from "./ThemeToggle";
 
 const MotionDiv = motion.div;
-
+const MotionButton = motion.button;
 const AuthenticatedLayout = ({ children }) => {
   const { isSidebarOpen, modal } = useSelector((state) => state.ui);
   const { user } = useSelector((state) => state.auth);
@@ -69,7 +69,7 @@ const AuthenticatedLayout = ({ children }) => {
                 <Heart className="w-6 h-6 text-white fill-current" />
               </div>
               <span className="text-2xl font-black font-heading tracking-tighter text-foreground pl-1">
-                InfiHeal
+                Aurora
               </span>
             </Link>
           </div>
