@@ -11,15 +11,15 @@ def create_alert(user_id: int, risk_level: str, reason: str) -> AlertLog:
 
     Args:
         user_id:    ID of the user whose message triggered the alert.
-        risk_level: Severity string — "high" or "none".
+        risk_level: Severity string — "LOW", "MEDIUM", "HIGH", or "CRITICAL".
         reason:     Human-readable explanation of why the alert was created.
 
     Returns:
         The saved AlertLog instance.
     """
-    if risk_level not in ["high", "none"]:
-        # Standardize fallback to none if something weird happens in ML engine
-        risk_level = "none"
+    if risk_level not in ["LOW", "MEDIUM", "HIGH", "CRITICAL"]:
+        # Standardize fallback to LOW if something weird happens in ML engine
+        risk_level = "LOW"
 
     alert = AlertLog(
         user_id=user_id,

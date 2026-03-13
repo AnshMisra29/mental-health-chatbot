@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+import re
 
 from auth import auth_bp
 from database.db import db
@@ -20,6 +21,11 @@ def register():
     name     = data["name"].strip()
     email    = data["email"].strip().lower()
     password = data["password"]
+
+    # Validate email format
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_pattern, email):
+        return jsonify({"error": "Invalid email format"}), 400
 
     # Check if email already registered
     if User.query.filter_by(email=email).first():

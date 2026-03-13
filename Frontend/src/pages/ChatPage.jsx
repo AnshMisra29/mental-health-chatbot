@@ -11,18 +11,27 @@ import {
   Paperclip,
 } from "lucide-react";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
-import { addMessage, setTyping, sendMessage, clearError } from "../features/chat/chatSlice";
+import { addMessage, setTyping, sendMessage, clearError, fetchChatHistory } from "../features/chat/chatSlice";
 import { logout } from "../features/auth/authSlice";
 
 const MotionDiv = motion.div;
 
 const ChatPage = () => {
   const [input, setInput] = useState("");
-  const { messages, isTyping, error: chatError } = useSelector((state) => state.chat);
+  const { messages, isTyping, error: chatError, historyLoading } = useSelector((state) => state.chat);
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
   const msgCounter = useRef(0);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+
+  // Load chat history on component mount
+  useEffect(() => {
+    if (!historyLoaded && user) {
+      dispatch(fetchChatHistory({ page: 1, per_page: 50 }));
+      setHistoryLoaded(true);
+    }
+  }, [user, dispatch, historyLoaded]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -98,7 +107,19 @@ const ChatPage = () => {
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-8 space-y-8 scroll-smooth"
         >
-          {messages.length === 0 && (
+          {historyLoading && messages.length === 0 && (
+            <div className="max-w-md mx-auto text-center mt-20">
+              <div className="w-20 h-20 rounded-3xl bg-indigo-600/10 flex items-center justify-center mx-auto mb-6 border border-indigo-500/20 animate-pulse">
+                <Sparkles className="w-10 h-10 text-indigo-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Loading your history...</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Retrieving your previous conversations
+              </p>
+            </div>
+          )}
+
+          {messages.length === 0 && !historyLoading && (
             <div className="max-w-md mx-auto text-center mt-20">
               <div className="w-20 h-20 rounded-3xl bg-indigo-600/10 flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
                 <Sparkles className="w-10 h-10 text-indigo-400" />
@@ -164,6 +185,16 @@ const ChatPage = () => {
                     {msg.sender === "ai" && msg.emotion && (
                       <span className="text-[10px] font-black text-indigo-400/60 uppercase tracking-tighter">
                         • {msg.emotion}
+                      </span>
+                    )}
+                    {msg.sender === "ai" && msg.riskLevel && (
+                      <span className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-full ${
+                        msg.riskLevel === "CRITICAL" ? "bg-red-500/20 text-red-400" :
+                        msg.riskLevel === "HIGH" ? "bg-orange-500/20 text-orange-400" :
+                        msg.riskLevel === "MEDIUM" ? "bg-yellow-500/20 text-yellow-400" :
+                        "bg-green-500/20 text-green-400"
+                      }`}>
+                        {msg.riskLevel}
                       </span>
                     )}
                   </div>

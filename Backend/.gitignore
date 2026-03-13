@@ -2,8 +2,5 @@
 __pycache__/
 *.pyc
 
-# Flask instance folder
-instance/
-
-# SQLite database — never push this to GitHub
-mental_health.db
+# Environment variables — never push to GitHub
+.env

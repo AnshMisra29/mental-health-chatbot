@@ -22,6 +22,24 @@ MODEL_ID = "llama-3.3-70b-versatile"
 
 CRISIS_LABEL = "Suicidal"
 
+# Emotion to Risk Level Mapping
+EMOTION_TO_RISK_LEVEL = {
+    "Normal": "LOW",
+    "Anxiety": "MEDIUM",
+    "Stress": "MEDIUM",
+    "Depression": "HIGH",
+    "Bipolar": "HIGH",
+    "Personality Disorder": "HIGH",
+    "Suicidal": "CRITICAL"
+}
+
+def get_risk_level(emotion):
+    """
+    Maps detected emotion to clinical risk level.
+    Returns one of: LOW, MEDIUM, HIGH, CRITICAL
+    """
+    return EMOTION_TO_RISK_LEVEL.get(emotion, "LOW")
+
 def get_chatbot_response(user_id, message):
     """
     Hybrid response generation:
@@ -51,22 +69,40 @@ def get_chatbot_response(user_id, message):
     
     # 2. Crisis Handling
     if is_crisis:
+        risk_level = "CRITICAL"
         try:
             # Log alert for medical/safety oversight
-            create_alert(user_id, risk_level="high", reason=f"Suicidal ideation detected ({confidence:.1%})")
+            create_alert(user_id, risk_level="CRITICAL", reason=f"Suicidal ideation detected ({confidence:.1%})")
         except Exception as e:
             # During standalone testing or if DB is down, we log to console instead of crashing
             print(f"ALERT LOGGING ERROR: {e}")
             print(f"CRISIS DETECTED for user {user_id}: Suicidal ideation ({confidence:.1%})")
 
+        # Save crisis interaction to database
+        try:
+            chat_record = ChatHistory(
+                user_id=user_id,
+                message=message,
+                bot_response="I hear that you're going through a very difficult time. Please know that you're not alone and there is support available. If you're in immediate danger, please reach out to local emergency services or a crisis helpline like iCall India at 9152987821.",
+                emotion=detected_emotion,
+                risk_level=risk_level,
+                model_metadata=analysis
+            )
+            db.session.add(chat_record)
+            db.session.commit()
+        except Exception as db_err:
+            print(f"DEBUG: DB Save Error (skipped): {db_err}")
+
         return {
             "response": "I hear that you're going through a very difficult time. Please know that you're not alone and there is support available. If you're in immediate danger, please reach out to local emergency services or a crisis helpline like iCall India at 9152987821.",
             "emotion": detected_emotion,
-            "is_crisis": True
+            "is_crisis": True,
+            "risk_level": risk_level
         }
 
     # 3. Conversational Response (Groq)
     try:
+        risk_level = get_risk_level(detected_emotion)
         history = context_manager.get_context(user_id)
         
         # Prepare system prompt
@@ -109,7 +145,7 @@ def get_chatbot_response(user_id, message):
                 message=message,
                 bot_response=reply,
                 emotion=detected_emotion,
-                risk_level="high" if is_crisis else "none",
+                risk_level=risk_level,
                 model_metadata=analysis # Stores raw multi-class confidence scores
             )
             db.session.add(chat_record)
@@ -120,7 +156,8 @@ def get_chatbot_response(user_id, message):
         return {
             "response": reply,
             "emotion": detected_emotion,
-            "is_crisis": False
+            "is_crisis": False,
+            "risk_level": risk_level
         }
         
     except Exception as e:
@@ -131,6 +168,8 @@ def get_chatbot_response(user_id, message):
         else:
             fallback_msg = f"I'm here for you. It sounds like you're dealing with {detected_emotion.lower()} right now. How can I help?"
         
+        risk_level = get_risk_level(detected_emotion)
+        
         # Save fallback response to DB as well
         try:
             chat_record = ChatHistory(
@@ -138,7 +177,7 @@ def get_chatbot_response(user_id, message):
                 message=message,
                 bot_response=fallback_msg,
                 emotion=detected_emotion,
-                risk_level="high" if is_crisis else "none",
+                risk_level=risk_level,
                 model_metadata=analysis
             )
             db.session.add(chat_record)
@@ -149,5 +188,6 @@ def get_chatbot_response(user_id, message):
         return {
             "response": fallback_msg,
             "emotion": detected_emotion,
-            "is_crisis": False
+            "is_crisis": False,
+            "risk_level": risk_level
         }
