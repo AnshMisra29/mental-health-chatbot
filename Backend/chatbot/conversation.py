@@ -75,13 +75,14 @@ def get_chatbot_response(user_id, message):
     # 2. Crisis Handling
     if is_crisis:
         risk_level = "CRITICAL"
+        alert = None # Initialize alert to None
         try:
             # Log alert for medical/safety oversight
-            create_alert(user_id, risk_level="CRITICAL", reason=f"Suicidal ideation detected ({confidence:.1%})")
+            alert = create_alert(user_id, risk_level="CRITICAL", reason=f"Suicidal ideation detected ({confidence:.1%})")
         except Exception as e:
             # During standalone testing or if DB is down, we log to console instead of crashing
             print(f"ALERT LOGGING ERROR: {e}")
-            print(f"CRISIS DETECTED for user {user_id}: Suicidal ideation ({confidence:.1%})")
+            alert = None
 
         # Save crisis interaction to database
         try:
@@ -102,7 +103,8 @@ def get_chatbot_response(user_id, message):
             "response": "I hear that you're going through a very difficult time. Please know that you're not alone and there is support available. If you're in immediate danger, please reach out to local emergency services or a crisis helpline like iCall India at 9152987821.",
             "emotion": detected_emotion,
             "is_crisis": True,
-            "risk_level": risk_level
+            "risk_level": risk_level,
+            "alert_id": alert.id if alert else None
         }
 
     # 3. Conversational Response (Groq)

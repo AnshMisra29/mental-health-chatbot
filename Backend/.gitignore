@@ -4,3 +4,7 @@ __pycache__/
 
 # Environment variables — never push to GitHub
 .env
+
+# SQLite Database
+*.db
+instance/

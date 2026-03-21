@@ -69,7 +69,9 @@ const chatSlice = createSlice({
           emotion: action.payload.emotion,
           riskLevel: action.payload.risk_level,
           isCrisis: action.payload.is_crisis,
+          alertId: action.payload.alert_id,
           timestamp: new Date().toLocaleTimeString([], {
+
             hour: "2-digit",
             minute: "2-digit",
           }),

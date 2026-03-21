@@ -12,3 +12,4 @@ transformers
 accelerate
 scikit-learn
 groq
+flask-mail
