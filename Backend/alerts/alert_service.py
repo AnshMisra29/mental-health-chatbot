@@ -27,7 +27,7 @@ def create_alert(user_id: int, risk_level: str, reason: str) -> AlertLog:
         reason=reason
     )
 
-    # TODO: wrap in try/except when email notifications or batch operations are added
+    # Save and return the alert object
     db.session.add(alert)
     db.session.commit()
 

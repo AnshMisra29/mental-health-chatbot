@@ -7,6 +7,8 @@ from flask_jwt_extended import JWTManager
 
 from config import Config
 from database.db import db
+from notifications import mail
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -19,6 +21,8 @@ jwt = JWTManager(app)
 
 db.init_app(app)
 migrate = Migrate(app, db)
+mail.init_app(app)
+
 
 # Import models so Flask-Migrate can detect tables
 from database import models
@@ -27,12 +31,16 @@ from database import models
 from auth import auth_bp
 from alerts import alerts_bp
 from dashboard import dashboard_bp
-
+from doctors import doctors_bp
 from chatbot.routes import chatbot_bp
+
+
 app.register_blueprint(auth_bp,      url_prefix="/api/auth")
 app.register_blueprint(alerts_bp,    url_prefix="/api/alerts")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
+app.register_blueprint(doctors_bp,   url_prefix="/api/doctors")
 app.register_blueprint(chatbot_bp,   url_prefix="/api/chat")
+
 
 # ── Load ML Model ─────────────────────────────────────────────────────────────
 from ml_engine.inference.model_loader import load_model_async, model_loader

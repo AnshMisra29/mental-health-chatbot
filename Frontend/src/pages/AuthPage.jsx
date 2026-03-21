@@ -197,12 +197,7 @@ const AuthPage = () => {
             <div className="flex-1 h-px bg-border/60" />
           </div>
 
-          <div className="mt-10">
-            <button className="w-full py-5 rounded-[2rem] bg-background border border-border/60 hover:bg-cyan-500/5 hover:border-cyan-400/20 transition-all font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-4 active:scale-95 text-foreground/50 hover:text-cyan-600 shadow-sm">
-              <GithubIcon className="w-6 h-6 text-foreground" />
-              Github Connection
-            </button>
-          </div>
+
         </div>
 
         <p className="text-center text-foreground/20 mt-12 text-[10px] font-black uppercase tracking-[0.2em] max-w-xs mx-auto leading-loose">

@@ -11,7 +11,9 @@ import {
   Paperclip,
 } from "lucide-react";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
+import DoctorSelectionModal from "../components/DoctorSelectionModal";
 import {
+
   addMessage,
   setTyping,
   sendMessage,
@@ -35,6 +37,11 @@ const ChatPage = () => {
   const scrollRef = useRef(null);
   const msgCounter = useRef(0);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  
+  // Doctor Selection Modal State
+  const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
+  const [activeAlertId, setActiveAlertId] = useState(null);
+
 
   // Load chat history on component mount
   useEffect(() => {
@@ -56,6 +63,16 @@ const ChatPage = () => {
       dispatch(logout());
     }
   }, [chatError, dispatch]);
+
+  // Handle Crisis Modal Trigger
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.sender === "ai" && lastMessage.isCrisis && lastMessage.alertId) {
+      setActiveAlertId(lastMessage.alertId);
+      setIsDoctorModalOpen(true);
+    }
+  }, [messages]);
+
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -278,8 +295,16 @@ const ChatPage = () => {
             Sia AI can make mistakes. Consider checking important info.
           </p>
         </div>
+
+        {/* Doctor Selection Modal */}
+        <DoctorSelectionModal 
+          isOpen={isDoctorModalOpen} 
+          onClose={() => setIsDoctorModalOpen(false)} 
+          alertId={activeAlertId}
+        />
       </div>
     </AuthenticatedLayout>
+
   );
 };
 
