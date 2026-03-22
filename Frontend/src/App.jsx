@@ -14,6 +14,7 @@ import DashboardPage from "./pages/DashboardPage";
 import CommunityPage from "./pages/CommunityPage";
 import ChatPage from "./pages/ChatPage";
 import HelpPage from "./pages/HelpPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 // Component Imports
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -33,6 +34,7 @@ function App() {
               !isAuthenticated ? <AuthPage /> : <Navigate to="/dashboard" />
             }
           />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
 
           {/* Protected Routes */}
           <Route

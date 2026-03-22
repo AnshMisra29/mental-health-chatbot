@@ -26,9 +26,7 @@ export const register = createAsyncThunk(
         email: userData.email,
         password: userData.password
       });
-      const { access_token, user } = response.data;
-      localStorage.setItem("token", access_token);
-      return user;
+      return response.data; // Now returns {message, user, email_sent}
     } catch (err) {
       return rejectWithValue(err.response?.data?.error || "Registration failed");
     }
@@ -89,9 +87,8 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
-        state.isAuthenticated = true;
-        localStorage.setItem("user", JSON.stringify(action.payload));
+        // Do not set user or isAuthenticated
+        // The component will handle the success message
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;

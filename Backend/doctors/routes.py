@@ -50,14 +50,14 @@ def list_doctors():
 @doctors_bp.route('/nearby', methods=['GET'])
 @jwt_required()
 def get_nearby_doctors():
-    """Find top 3 nearby doctors based on lat/lon query params."""
+    """Find top 9 nearby doctors sorted by distance based on lat/lon query params."""
     try:
         user_lat = request.args.get('lat', type=float)
         user_lon = request.args.get('lon', type=float)
 
         if user_lat is None or user_lon is None:
-            # Fallback: return any 3 doctors if location missing
-            doctors = Doctor.query.limit(3).all()
+            # Fallback: return any 9 doctors if location missing
+            doctors = Doctor.query.limit(9).all()
             return jsonify({"doctors": [d.to_dict() for d in doctors]}), 200
 
         all_doctors = Doctor.query.all()
@@ -68,7 +68,7 @@ def get_nearby_doctors():
         )
         
         nearby = []
-        for d in sorted_doctors[:3]:
+        for d in sorted_doctors[:9]:
             dist = calculate_distance(user_lat, user_lon, d.latitude, d.longitude)
             nearby.append(d.to_dict(distance_km=dist))
 
@@ -97,13 +97,14 @@ def select_doctor():
 
     # Fire emails
     patient_ok = send_patient_confirmation(user, doctor)
-    doctor_ok = send_doctor_alert(doctor, user, alert)
+    # doctor_ok = send_doctor_alert(doctor, user, alert)  # Removed as per user request
+    doctor_ok = True  # Mocked as True since we are not sending it anymore
 
     # Mark as notified
     alert.notified = True
     db.session.commit()
 
     return jsonify({
-        "message": f"Notifications sent. {doctor.name} has been notified.",
-        "status": {"patient_email": patient_ok, "doctor_email": doctor_ok}
+        "message": f"Notifications sent. {doctor.name} info has been shared with you.",
+        "status": {"patient_email": patient_ok}
     }), 200

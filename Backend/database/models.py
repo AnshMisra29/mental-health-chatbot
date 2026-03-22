@@ -14,6 +14,8 @@ class User(db.Model):
     email         = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
     phone         = db.Column(db.String(20), nullable=True)   # optional — included in doctor alert emails
+    is_verified   = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(100), nullable=True)
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -90,6 +92,8 @@ class Doctor(db.Model):
     address        = db.Column(db.String(255), nullable=True)
     latitude       = db.Column(db.Float, nullable=True)          # for proximity search
     longitude      = db.Column(db.Float, nullable=True)
+    place_id       = db.Column(db.String(100), nullable=True)
+    maps_url       = db.Column(db.String(500), nullable=True)
     created_at     = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self, distance_km=None):
@@ -101,8 +105,8 @@ class Doctor(db.Model):
             "specialization": self.specialization,
             "clinic_name":    self.clinic_name,
             "address":        self.address,
-            "maps_url":       f"https://maps.google.com/?q={self.latitude},{self.longitude}"
-                              if self.latitude and self.longitude else None,
+            "place_id":       self.place_id,
+            "maps_url":       self.maps_url,
         }
         if distance_km is not None:
             d["distance_km"] = round(distance_km, 1)
@@ -110,3 +114,22 @@ class Doctor(db.Model):
 
     def __repr__(self):
         return f"<Doctor {self.name} ({self.email})>"
+
+
+# ── PendingUser ──────────────────────────────────────────────────────────────
+
+class PendingUser(db.Model):
+    __tablename__ = "pending_users"
+
+    id            = db.Column(db.Integer, primary_key=True)
+    name          = db.Column(db.String(100), nullable=False)
+    email         = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(256), nullable=False)
+    otp_code = db.Column(db.String(6), nullable=False)
+    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def __repr__(self):
+        return f"<PendingUser {self.email}>"

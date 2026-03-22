@@ -11,7 +11,7 @@ import {
   Paperclip,
 } from "lucide-react";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
-import DoctorSelectionModal from "../components/DoctorSelectionModal";
+import DoctorSuggestions from "../components/DoctorSuggestions";
 import {
 
   addMessage,
@@ -38,9 +38,8 @@ const ChatPage = () => {
   const msgCounter = useRef(0);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   
-  // Doctor Selection Modal State
-  const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
-  const [activeAlertId, setActiveAlertId] = useState(null);
+  // Doctor Suggestion State (No longer needed for modal, but kept if we want to track something else)
+  // const [activeAlertId, setActiveAlertId] = useState(null);
 
 
   // Load chat history on component mount
@@ -64,12 +63,11 @@ const ChatPage = () => {
     }
   }, [chatError, dispatch]);
 
-  // Handle Crisis Modal Trigger
+  // Handle Crisis (Modal removed, logging for potential future use)
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.sender === "ai" && lastMessage.isCrisis && lastMessage.alertId) {
-      setActiveAlertId(lastMessage.alertId);
-      setIsDoctorModalOpen(true);
+      console.log("Crisis detected, showing in-chat suggestions for alert:", lastMessage.alertId);
     }
   }, [messages]);
 
@@ -235,6 +233,13 @@ const ChatPage = () => {
                       </span>
                     )}
                   </div>
+
+                  {/* Inline Doctor Suggestions */}
+                  {msg.sender === "ai" && msg.isCrisis && msg.alertId && (
+                    <div className="w-full max-w-full overflow-hidden">
+                      <DoctorSuggestions alertId={msg.alertId} />
+                    </div>
+                  )}
                 </div>
               </MotionDiv>
             ))}
@@ -296,12 +301,6 @@ const ChatPage = () => {
           </p>
         </div>
 
-        {/* Doctor Selection Modal */}
-        <DoctorSelectionModal 
-          isOpen={isDoctorModalOpen} 
-          onClose={() => setIsDoctorModalOpen(false)} 
-          alertId={activeAlertId}
-        />
       </div>
     </AuthenticatedLayout>
 
