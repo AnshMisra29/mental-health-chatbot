@@ -6,6 +6,8 @@ Welcome to the team! Follow these steps to get the mental health chatbot running
 ```bash
 git pull origin main
 ```
+> [!WARNING]
+> **Database Overwrite**: Since the `mental_health.db` file is now tracked in Git, running `git pull` **WILL replace your local database** with the version from GitHub. If you have created local test users you want to keep, back up your `.db` file before pulling!
 
 ## 2. Backend Setup
 1.  **Navigate to Backend**: `cd Backend`
