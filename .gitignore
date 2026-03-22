@@ -18,8 +18,8 @@ dist-ssr/
 npm-debug.log*
 
 # Flask instance & database
-instance/
-*.db
+# instance/
+# *.db
 
 # Environment secrets — NEVER commit this
 .env
