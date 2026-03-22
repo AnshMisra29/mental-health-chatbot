@@ -112,6 +112,11 @@ def get_chatbot_response(user_id, message):
         risk_level = get_risk_level(detected_emotion)
         history = context_manager.get_context(user_id)
         
+        # If Groq client is not initialized, jump straight to fallback
+        if not client:
+            print("INFO: Groq client not initialized. Using fallback.")
+            return handle_fallback(user_id, message, detected_emotion, risk_level, analysis, "Groq client missing")
+
         # Prepare system prompt
         system_prompt = f"""
         You are Sia, a compassionate and empathetic mental health support assistant. 
@@ -158,7 +163,8 @@ def get_chatbot_response(user_id, message):
             db.session.add(chat_record)
             db.session.commit()
         except Exception as db_err:
-            print(f"DEBUG: DB Save Error (skipped): {db_err}")
+            db.session.rollback()
+            print(f"ERROR: DB Save Error: {db_err}")
 
         return {
             "response": reply,
@@ -168,33 +174,38 @@ def get_chatbot_response(user_id, message):
         }
         
     except Exception as e:
-        print(f"Groq API Error: {e}")
-        # Fallback Mode
-        if detected_emotion == "Normal":
-            fallback_msg = "I'm here for you and ready to listen. Would you like to tell me more about what's on your mind?"
-        else:
-            fallback_msg = f"I'm here for you. It sounds like you're dealing with {detected_emotion.lower()} right now. How can I help?"
-        
-        risk_level = get_risk_level(detected_emotion)
-        
-        # Save fallback response to DB as well
-        try:
-            chat_record = ChatHistory(
-                user_id=user_id,
-                message=message,
-                bot_response=fallback_msg,
-                emotion=detected_emotion,
-                risk_level=risk_level,
-                model_metadata=analysis
-            )
-            db.session.add(chat_record)
-            db.session.commit()
-        except Exception as db_err:
-             print(f"DEBUG: DB Fallback Save Error: {db_err}")
+        print(f"ERROR: Chat Generation Error: {e}")
+        return handle_fallback(user_id, message, detected_emotion, risk_level, analysis, str(e))
 
-        return {
-            "response": fallback_msg,
-            "emotion": detected_emotion,
-            "is_crisis": False,
-            "risk_level": risk_level
-        }
+def handle_fallback(user_id, message, detected_emotion, risk_level, analysis, error_reason):
+    """
+    Standardizes the fallback response logic.
+    """
+    if detected_emotion == "Normal":
+        fallback_msg = "I'm here for you and ready to listen. Would you like to tell me more about what's on your mind?"
+    else:
+        fallback_msg = f"I'm here for you. It sounds like you're dealing with {detected_emotion.lower()} right now. How can I help?"
+    
+    # Save fallback response to DB as well
+    try:
+        chat_record = ChatHistory(
+            user_id=user_id,
+            message=message,
+            bot_response=fallback_msg,
+            emotion=detected_emotion,
+            risk_level=risk_level,
+            model_metadata=analysis
+        )
+        db.session.add(chat_record)
+        db.session.commit()
+    except Exception as db_err:
+        db.session.rollback()
+        print(f"ERROR: DB Fallback Save Error: {db_err}")
+
+    return {
+        "response": fallback_msg,
+        "emotion": detected_emotion,
+        "is_crisis": False,
+        "risk_level": risk_level,
+        "error": error_reason
+    }
