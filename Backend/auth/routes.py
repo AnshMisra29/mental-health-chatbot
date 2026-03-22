@@ -3,12 +3,11 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 import re
 import uuid
 from auth import auth_bp
+import random
+from datetime import datetime, timedelta
 from database.db import db
 from database.models import User, PendingUser
-from notifications.email_service import send_verification_email
-
-
-import random
+from notifications.email_service import send_verification_email, send_reset_otp_email
 
 # ── POST /api/auth/register ───────────────────────────────────────────────────
 @auth_bp.route("/register", methods=["POST"])
@@ -70,7 +69,7 @@ def login():
 
     user = User.query.filter_by(email=email).first()
 
-    if not user or not user.check_password(password):
+    if not user:
         # Check if they are pending
         if PendingUser.query.filter_by(email=email).first():
             return jsonify({
@@ -78,6 +77,24 @@ def login():
                 "message": "Please enter the OTP sent to your email to verify your account."
             }), 403
         return jsonify({"error": "Invalid email or password"}), 401
+
+    # Check if account is locked
+    if user.failed_attempts >= 5:
+        return jsonify({"error": "Account locked. 5 incorrect attempts detected. Please use Forgot Password to reset."}), 403
+
+    if not user.check_password(password):
+        user.failed_attempts += 1
+        db.session.commit()
+        
+        if user.failed_attempts >= 5:
+            return jsonify({"error": "Account locked due to 5 incorrect attempts. Please use Forgot Password to reset."}), 403
+            
+        remaining = 5 - user.failed_attempts
+        return jsonify({"error": f"Invalid password. {remaining} attempts remaining before lockout."}), 401
+
+    # Success: reset failed attempts
+    user.failed_attempts = 0
+    db.session.commit()
 
     access_token = create_access_token(identity=str(user.id))
     return jsonify({
@@ -139,9 +156,19 @@ def resend_otp():
             return jsonify({"error": "Email is already verified. Please log in."}), 400
         return jsonify({"error": "No pending registration found for this email."}), 404
 
+    # Rate Limit Check (3 resends / 1 hour)
+    if pending.resend_count >= 3:
+        if pending.last_resend and (datetime.utcnow() - pending.last_resend) < timedelta(hours=1):
+            return jsonify({ "error": "Too many attempts. Please try after some time." }), 429
+        else:
+            # Reset after 1 hour pass
+            pending.resend_count = 0
+
     # Regenerate OTP
     new_otp = "".join([str(random.randint(0, 9)) for _ in range(6)])
     pending.otp_code = new_otp
+    pending.resend_count += 1
+    pending.last_resend = datetime.utcnow()
     db.session.commit()
 
     # Send verification email again
@@ -153,10 +180,93 @@ def resend_otp():
         return jsonify({ "error": "Failed to resend OTP." }), 500
 
 
+
+# ── POST /api/auth/forgot-password ───────────────────────────────────────────
+@auth_bp.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    data = request.get_json() or {}
+    email = data.get("email", "").strip().lower()
+
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "No account found with this email"}), 404
+
+    # Rate Limit Check (3 resends / 1 hour)
+    if user.resend_count >= 3:
+        if user.last_resend and (datetime.utcnow() - user.last_resend) < timedelta(hours=1):
+            return jsonify({ "error": "Too many attempts. Please try after some time." }), 429
+        else:
+            # Reset after 1 hour pass
+            user.resend_count = 0
+
+    # Generate 6-digit OTP
+    otp = "".join([str(random.randint(0, 9)) for _ in range(6)])
+    user.reset_otp = otp
+    user.resend_count += 1
+    user.last_resend = datetime.utcnow()
+    db.session.commit()
+
+    # Send reset email
+    email_sent = send_reset_otp_email(user, otp)
+    
+    if email_sent:
+        return jsonify({ "message": "Password reset OTP sent to your email." }), 200
+    else:
+        return jsonify({ "error": "Failed to send reset email." }), 500
+
+
+# ── POST /api/auth/verify-reset-otp ───────────────────────────────────────────
+@auth_bp.route("/verify-reset-otp", methods=["POST"])
+def verify_reset_otp():
+    data = request.get_json() or {}
+    email = data.get("email", "").strip().lower()
+    otp = data.get("otp", "").strip()
+
+    if not email or not otp:
+        return jsonify({"error": "Email and OTP are required"}), 400
+
+    user = User.query.filter_by(email=email, reset_otp=otp).first()
+    if not user:
+        return jsonify({"error": "Invalid or expired OTP code"}), 400
+
+    return jsonify({ "message": "OTP verified! Please set your new password." }), 200
+
+
+# ── POST /api/auth/reset-password ─────────────────────────────────────────────
+@auth_bp.route("/reset-password", methods=["POST"])
+def reset_password():
+    data = request.get_json() or {}
+    email = data.get("email", "").strip().lower()
+    otp = data.get("otp", "").strip()
+    new_password = data.get("password", "")
+
+    if not all([email, otp, new_password]):
+        return jsonify({"error": "All fields are required"}), 400
+
+    if len(new_password) < 6:
+        return jsonify({"error": "Password must be at least 6 characters long"}), 400
+
+    user = User.query.filter_by(email=email, reset_otp=otp).first()
+    if not user:
+        return jsonify({"error": "Verification failed. Please request a new OTP."}), 400
+
+    # Success: Update password and Reset security fields
+    user.set_password(new_password)
+    user.reset_otp = None
+    user.failed_attempts = 0
+    user.resend_count = 0
+    db.session.commit()
+
+    return jsonify({ "message": "Password reset successful! Please login." }), 200
+
 # ── GET /api/auth/me ──────────────────────────────────────────────────────────
 @auth_bp.route("/me", methods=["GET"])
 @jwt_required()
 def me():
+    # ... existing code ...
     user_id = int(get_jwt_identity())
     user    = db.session.get(User, user_id)
 

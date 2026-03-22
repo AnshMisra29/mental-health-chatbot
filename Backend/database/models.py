@@ -16,6 +16,10 @@ class User(db.Model):
     phone         = db.Column(db.String(20), nullable=True)   # optional — included in doctor alert emails
     is_verified   = db.Column(db.Boolean, default=False)
     verification_token = db.Column(db.String(100), nullable=True)
+    failed_attempts = db.Column(db.Integer, default=0)
+    resend_count   = db.Column(db.Integer, default=0)
+    last_resend    = db.Column(db.DateTime, nullable=True)
+    reset_otp      = db.Column(db.String(6), nullable=True)
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -125,7 +129,9 @@ class PendingUser(db.Model):
     name          = db.Column(db.String(100), nullable=False)
     email         = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
-    otp_code = db.Column(db.String(6), nullable=False)
+    otp_code      = db.Column(db.String(6), nullable=False)
+    resend_count  = db.Column(db.Integer, default=0)
+    last_resend   = db.Column(db.DateTime, nullable=True)
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):

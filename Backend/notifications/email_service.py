@@ -93,3 +93,30 @@ The Aurora Team
     except Exception as e:
         print(f"FAILED TO SEND VERIFICATION EMAIL: {e}")
         return False
+
+def send_reset_otp_email(user, otp):
+    """Sends a 6-digit OTP to the user for password reset."""
+    try:
+        msg = Message(
+            "Password Reset OTP - Aurora",
+            recipients=[user.email],
+            body=f"""
+Hello {user.name},
+
+You have requested to reset your password for your Aurora account. Please use the following 6-digit verification code:
+
+Verification Code: {otp}
+
+Enter this code on the password reset page to proceed.
+
+If you did not request a password reset, please ignore this email or contact support if you have concerns about your account security.
+
+Best regards,
+The Aurora Team
+            """
+        )
+        mail.send(msg)
+        return True
+    except Exception as e:
+        print(f"FAILED TO SEND RESET EMAIL: {e}")
+        return False
