@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -11,11 +11,13 @@ import {
   Heart,
   Layout as LayoutIcon,
   BookOpen,
+  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { setSidebarOpen, closeModal } from "../features/ui/uiSlice";
 import { logout } from "../features/auth/authSlice";
 import ThemeToggle from "./ThemeToggle";
+import api from "../services/api";
 
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
@@ -249,30 +251,216 @@ const AuthenticatedLayout = ({ children }) => {
               </h2>
             </div>
 
-            <div className="space-y-6 text-foreground/40 text-lg font-medium leading-relaxed mb-12">
-              <p>
-                {modal.data?.author
-                  ? "Contribution by " + modal.data.author
-                  : "Thank you for engaging with our community."}
-              </p>
-              <p>
-                This content is currently being finalized to provide you with
-                the most accurate and empathetic support possible. We're
-                dedicated to your journey.
-              </p>
-            </div>
+            {modal.data?.type === "community_post" ? (
+              <CommunityPostForm 
+                onClose={() => dispatch(closeModal())} 
+                initialData={modal.data}
+              />
+            ) : modal.data?.type === "mood_entry" ? (
+              <MoodEntryForm 
+                mood={modal.data} 
+                onClose={() => dispatch(closeModal())} 
+              />
+            ) : modal.data?.type === "confirm_delete" ? (
+              <ConfirmDeleteModal 
+                postId={modal.data.id} 
+                onClose={() => dispatch(closeModal())} 
+              />
+            ) : (
+              <>
+                <div className="space-y-6 text-foreground/40 text-lg font-medium leading-relaxed mb-12">
+                  <p>
+                    {modal.data?.author
+                      ? "Contribution by " + modal.data.author
+                      : "Thank you for engaging with our community."}
+                  </p>
+                  <p>
+                    This content is currently being finalized to provide you with
+                    the most accurate and empathetic support possible. We're
+                    dedicated to your journey.
+                  </p>
+                </div>
 
-            <MotionButton
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => dispatch(closeModal())}
-              className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-cyan-600/20 transition-all"
-            >
-              Understand & Close
-            </MotionButton>
+                <MotionButton
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => dispatch(closeModal())}
+                  className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-cyan-600/20 transition-all"
+                >
+                  Understand & Close
+                </MotionButton>
+              </>
+            )}
           </MotionDiv>
         </div>
       )}
+    </div>
+  );
+};
+
+const CommunityPostForm = ({ onClose, initialData }) => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState(initialData?.category || "Stories");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api.post("/community/posts", { title, content, category });
+      onClose();
+      window.dispatchEvent(new Event("community-post-created"));
+    } catch (error) {
+      console.error("Error creating post:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="relative group">
+        <label className="block text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-3">Category</label>
+        <div className="relative">
+          <select 
+            value={category} 
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full p-4 pr-12 rounded-2xl bg-background border border-border/60 text-sm font-bold focus:border-cyan-500 outline-none transition-all appearance-none cursor-pointer"
+          >
+            {["Tips", "Exercises", "Awareness", "Stories"].map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30 group-focus-within:text-cyan-500 transition-colors">
+            <ChevronDown className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+      <div>
+        <label className="block text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-3">Title</label>
+        <input 
+          type="text" 
+          value={title} 
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          placeholder="Give your story a title..."
+          className="w-full p-4 rounded-2xl bg-background border border-border/60 text-sm font-bold focus:border-cyan-500 outline-none transition-all"
+        />
+      </div>
+      <div>
+        <label className="block text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-3">Content</label>
+        <textarea 
+          value={content} 
+          onChange={(e) => setContent(e.target.value)}
+          required
+          rows={4}
+          placeholder="Share your experience..."
+          className="w-full p-4 rounded-2xl bg-background border border-border/60 text-sm font-bold focus:border-cyan-500 outline-none transition-all resize-none"
+        />
+      </div>
+      <MotionButton
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        disabled={loading}
+        className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-50"
+      >
+        {loading ? "Uploading..." : "Upload Post"}
+      </MotionButton>
+    </form>
+  );
+};
+
+const MoodEntryForm = ({ mood, onClose }) => {
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api.post("/mood/logs", { 
+        mood_label: mood.label, 
+        mood_emoji: mood.emoji,
+        note 
+      });
+      onClose();
+      window.dispatchEvent(new Event("mood-updated"));
+    } catch (error) {
+      console.error("Error logging mood:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="text-center mb-8">
+        <span className="text-6xl block mb-4">{mood.emoji}</span>
+        <p className="text-foreground/50 font-medium">You're feeling <span className="text-foreground font-black uppercase tracking-widest text-xs">{mood.label}</span></p>
+      </div>
+      <div>
+        <label className="block text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-3">Add a note (optional)</label>
+        <textarea 
+          value={note} 
+          onChange={(e) => setNote(e.target.value)}
+          rows={3}
+          placeholder="How was your day?"
+          className="w-full p-4 rounded-2xl bg-background border border-border/60 text-sm font-bold focus:border-cyan-500 outline-none transition-all resize-none"
+        />
+      </div>
+      <MotionButton
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        disabled={loading}
+        className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-50"
+      >
+        {loading ? "Saving..." : "Log Mood"}
+      </MotionButton>
+    </form>
+  );
+};
+
+const ConfirmDeleteModal = ({ postId, onClose }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      await api.delete(`/community/posts/${postId}`);
+      onClose();
+      window.dispatchEvent(new Event("community-post-created"));
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="text-center">
+      <div className="w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-6">
+        <Heart className="w-10 h-10 text-rose-500" />
+      </div>
+      <h3 className="text-2xl font-black mb-4 font-heading tracking-tight">Delete Post?</h3>
+      <p className="text-foreground/50 mb-8 font-medium">Are you sure you want to delete this post? This action cannot be undone.</p>
+      
+      <div className="flex gap-4">
+        <button
+          onClick={onClose}
+          disabled={loading}
+          className="flex-1 py-4 rounded-[2rem] bg-card border border-border/60 font-black uppercase tracking-widest text-xs hover:bg-card/80 transition-all text-foreground/70"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleDelete}
+          disabled={loading}
+          className="flex-1 py-4 rounded-[2rem] bg-rose-500 text-white font-black uppercase tracking-widest text-xs hover:bg-rose-600 transition-all shadow-xl shadow-rose-500/20 disabled:opacity-50"
+        >
+          {loading ? "Deleting..." : "Delete Post"}
+        </button>
+      </div>
     </div>
   );
 };

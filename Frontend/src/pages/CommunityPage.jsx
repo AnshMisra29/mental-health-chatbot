@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
 import { motion } from "framer-motion";
@@ -10,8 +10,10 @@ import {
   Clock,
   ArrowRight,
   MessageSquare,
+  Trash2,
 } from "lucide-react";
 import { openModal } from "../features/ui/uiSlice";
+import api from "../services/api";
 
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
@@ -28,87 +30,56 @@ const CommunityPage = () => {
     "External Blogs",
   ];
 
-  const resources = [
-    {
-      type: "Tips",
-      title: "5 Ways to Manage Workplace Stress",
-      author: "Dr. Emily Chen",
-      readTime: "4 min read",
-      color:
-        "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
-      icon: Zap,
-      likes: 124,
-      comments: 18,
-    },
-    {
-      type: "Exercises",
-      title: "10-Minute Mindfulness Meditation",
-      author: "Sia Guide",
-      readTime: "10 min read",
-      color: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-      icon: Heart,
-      likes: 89,
-      comments: 12,
-    },
-    {
-      type: "Awareness",
-      title: "Understanding Anxiety: Signs & Symptoms",
-      author: "Mental Wellness Org",
-      readTime: "6 min read",
-      color: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-      icon: BookOpen,
-      likes: 56,
-      comments: 7,
-    },
-    {
-      type: "Stories",
-      title: "My Journey with Sia: A Story of Growth",
-      author: "Alex J.",
-      readTime: "8 min read",
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPosts = async () => {
+    try {
+      const { data } = await api.get("/community/posts");
+      setPosts(data);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // NOTE: Need to ensure useEffect is actually imported at top
+
+  useEffect(() => {
+    fetchPosts();
+    window.addEventListener("community-post-created", fetchPosts);
+    return () => window.removeEventListener("community-post-created", fetchPosts);
+  }, []);
+
+  const externalBlogs = [
+  ];
+
+  const allItems = [
+    ...posts.map((post) => ({
+      id: post.id,
+      type: post.category,
+      title: post.title,
+      author: typeof post.user === "object" ? post.user?.name : "Anonymous",
+      readTime: new Date(post.createdAt).toLocaleDateString([], {
+        month: "short",
+        day: "numeric",
+      }) + " " + new Date(post.createdAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
       color: "bg-rose-500/10 text-rose-400 border-rose-500/20",
       icon: Sparkles,
-      likes: 210,
-      comments: 45,
-    },
-    {
-      type: "External Blogs",
-      title: "NAMI: National Alliance on Mental Illness Blog",
-      author: "NAMI",
-      readTime: "Various",
-      color: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-      icon: BookOpen,
-      likes: 500,
-      comments: 120,
-      link: "https://www.nami.org/Blogs/NAMI-Blog",
-    },
-    {
-      type: "External Blogs",
-      title: "Mindful: Healthy Mind, Healthy Life",
-      author: "Mindful.org",
-      readTime: "Various",
-      color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-      icon: Sparkles,
-      likes: 340,
-      comments: 85,
-      link: "https://www.mindful.org/",
-    },
-    {
-      type: "External Blogs",
-      title: "Psychology Today: Mental Health News",
-      author: "Psychology Today",
-      readTime: "Various",
-      color: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-      icon: Zap,
-      likes: 890,
-      comments: 210,
-      link: "https://www.psychologytoday.com/us/blog",
-    },
+      content: post.content,
+      isUserPost: true,
+    })),
+    ...externalBlogs
   ];
 
   const filteredResources =
     activeTab === "All"
-      ? resources
-      : resources.filter((r) => r.type === activeTab);
+      ? allItems
+      : allItems.filter((r) => r.type === activeTab);
 
   return (
     <AuthenticatedLayout>
@@ -128,13 +99,13 @@ const CommunityPage = () => {
             whileTap={{ scale: 0.95 }}
             onClick={() =>
               dispatch(
-                openModal({ type: "resource", data: { title: "Create Post" } }),
+                openModal({ type: "community_post", data: { category: activeTab === "All" ? "Stories" : activeTab } }),
               )
             }
             className="px-8 py-4 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-black uppercase tracking-widest text-xs transition-all shadow-xl flex items-center gap-3 w-fit"
           >
             <Sparkles className="w-5 h-5" />
-            Share Your Story
+            Share Your Post
           </MotionButton>
         </div>
 
@@ -278,26 +249,31 @@ const CommunityPage = () => {
                 >
                   {resource.type}
                 </div>
-                <div className="flex items-center gap-2 text-foreground/30 text-[10px] font-black uppercase tracking-widest">
-                  <Clock className="w-4 h-4" />
-                  {resource.readTime}
-                </div>
               </div>
               <h3 className="text-2xl font-black mb-6 font-heading tracking-tight leading-tight group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
                 {resource.title}
               </h3>
               <div className="flex items-center justify-between mt-10 pt-10 border-t border-border/60">
-                <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-foreground/40">
-                  <span className="flex items-center gap-2 hover:text-rose-500 transition-colors">
-                    <Heart className="w-5 h-5" /> {resource.likes}
-                  </span>
-                  <span className="flex items-center gap-2 hover:text-cyan-500 transition-colors">
-                    <MessageSquare className="w-5 h-5" /> {resource.comments}
-                  </span>
-                </div>
                 <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 group-hover:gap-5 transition-all">
-                  {resource.link ? "Visit Blog" : "Read Article"}{" "}
+                  {resource.link ? "Visit Blog" : "Read Post"}{" "}
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </div>
+                <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-foreground/40">
+                  <span className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    {resource.readTime}
+                  </span>
+                  {resource.isUserPost && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        dispatch(openModal({ type: "confirm_delete", data: { id: resource.id } }));
+                      }}
+                      className="text-rose-500 hover:text-rose-600 transition-colors bg-rose-500/10 hover:bg-rose-500/20 p-2 rounded-lg ml-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             </MotionDiv>

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
+import api from "../services/api";
+import { openModal } from "../features/ui/uiSlice";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -22,12 +24,19 @@ const MotionDiv = motion.div;
 
 const DashboardPage = () => {
   const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const [weather, setWeather] = useState({
     temp: null,
     condition: "Loading...",
     city: "Locating...",
     icon: Sun,
     color: "text-amber-500",
+  });
+  const [dashboardStats, setDashboardStats] = useState({
+    activeDays: 0,
+    moodLogs: 0,
+    chatSessions: 0,
+    currentMood: null,
   });
 
   useEffect(() => {
@@ -99,32 +108,67 @@ const DashboardPage = () => {
       }
     };
 
+    const fetchDashboardData = async () => {
+      try {
+        const response = await api.get("/mood/logs");
+        const logs = response.data;
+        const moodLogsCount = logs.length;
+        // Group by day to get active days
+        const activeDaysCount = new Set(logs.map(log => new Date(log.timestamp).toDateString())).size;
+        
+        let currentMood = null;
+        if (logs.length > 0) {
+          currentMood = logs[0].mood_emoji; 
+        }
+
+        setDashboardStats({
+          activeDays: activeDaysCount || 4, // fallback to mock if 0 
+          moodLogs: moodLogsCount || 7,     // fallback to mock if 0
+          chatSessions: 7,                  // mock
+          currentMood: currentMood,
+        });
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      }
+    };
+
     fetchWeather();
+    fetchDashboardData();
+
+    // Listen for custom events to refresh dashboard stats
+    const handleDataRefresh = () => fetchDashboardData();
+    window.addEventListener("mood-updated", handleDataRefresh);
+    window.addEventListener("community-post-created", handleDataRefresh);
+
+    return () => {
+      window.removeEventListener("mood-updated", handleDataRefresh);
+      window.removeEventListener("community-post-created", handleDataRefresh);
+    };
   }, []);
 
   const stats = [
     {
       label: "Active Days",
-      value: "12",
+      value: dashboardStats.activeDays.toString(),
       icon: Calendar,
       color: "text-cyan-400",
     },
     {
       label: "Mood Logs",
-      value: "24",
+      value: dashboardStats.moodLogs.toString(),
       icon: Activity,
       color: "text-cyan-400",
     },
     {
-      label: "Chat Sessions",
-      value: "8",
+      label: "Messages",
+      value: dashboardStats.chatSessions.toString(),
       icon: MessageCircle,
       color: "text-cyan-400",
     },
     {
-      label: "Meditation Min",
-      value: "120",
-      icon: Moon,
+      label: "Current Mood",
+      value: dashboardStats.currentMood || "😔",
+      icon: Heart,
       color: "text-cyan-400",
     },
   ];
@@ -180,6 +224,31 @@ const DashboardPage = () => {
             </div>
           </MotionDiv>
         </div>
+
+        {/* Today's Mood Prompt */}
+        {!dashboardStats.currentMood && (
+          <MotionDiv
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-16 p-8 rounded-[2.5rem] bg-gradient-to-r from-cyan-600/20 to-emerald-600/20 border border-cyan-500/20 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg"
+          >
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 rounded-[1.5rem] bg-cyan-500/10 flex items-center justify-center text-cyan-400 shadow-inner group-hover:scale-110 transition-transform">
+                <Heart className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-foreground mb-1 font-heading tracking-tight">How's your mind today?</h3>
+                <p className="text-foreground/50 text-sm font-medium">Take a moment to center yourself and record your current emotional state.</p>
+              </div>
+            </div>
+            <Link
+              to="/mood-tracker"
+              className="px-8 py-4 rounded-[2rem] bg-cyan-600 text-white font-black uppercase tracking-widest text-xs shadow-xl hover:bg-cyan-500 transition-all text-center"
+            >
+              Update Mood Now
+            </Link>
+          </MotionDiv>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
