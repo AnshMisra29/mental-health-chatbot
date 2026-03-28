@@ -139,3 +139,65 @@ class PendingUser(db.Model):
 
     def __repr__(self):
         return f"<PendingUser {self.email}>"
+
+
+# ── CommunityPost ─────────────────────────────────────────────────────────────
+
+class CommunityPost(db.Model):
+    __tablename__ = 'community_posts'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title      = db.Column(db.String(255), nullable=False)
+    content    = db.Column(db.Text, nullable=False)
+    category   = db.Column(db.String(50), nullable=False)
+    likes      = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('community_posts', lazy=True, cascade='all, delete-orphan'))
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "title": self.title,
+            "content": self.content,
+            "category": self.category,
+            "likes": self.likes,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "user": {
+                "id": self.user.id,
+                "name": self.user.name
+            } if self.user else None
+        }
+
+    def __repr__(self):
+        return f"<CommunityPost {self.id} by user {self.user_id}>"
+
+
+# ── MoodLog ───────────────────────────────────────────────────────────────────
+
+class MoodLog(db.Model):
+    __tablename__ = 'mood_logs'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    mood_label = db.Column(db.String(50), nullable=False)
+    mood_emoji = db.Column(db.String(10), nullable=True)
+    note       = db.Column(db.Text, nullable=True)
+    timestamp  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('mood_logs', lazy=True, cascade='all, delete-orphan'))
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "mood_label": self.mood_label,
+            "mood_emoji": self.mood_emoji,
+            "note": self.note,
+            "timestamp": self.timestamp.isoformat() if self.timestamp else None
+        }
+
+    def __repr__(self):
+        return f"<MoodLog {self.mood_label} by user {self.user_id}>"

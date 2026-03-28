@@ -33,6 +33,8 @@ from alerts import alerts_bp
 from dashboard import dashboard_bp
 from doctors import doctors_bp
 from chatbot.routes import chatbot_bp
+from mood import mood_bp
+from community import community_bp
 
 
 app.register_blueprint(auth_bp,      url_prefix="/api/auth")
@@ -40,6 +42,8 @@ app.register_blueprint(alerts_bp,    url_prefix="/api/alerts")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(doctors_bp,   url_prefix="/api/doctors")
 app.register_blueprint(chatbot_bp,   url_prefix="/api/chat")
+app.register_blueprint(mood_bp,      url_prefix="/api/mood")
+app.register_blueprint(community_bp, url_prefix="/api/community")
 
 
 # ── Load ML Model ─────────────────────────────────────────────────────────────

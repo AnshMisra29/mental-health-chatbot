@@ -110,21 +110,34 @@ const DashboardPage = () => {
 
     const fetchDashboardData = async () => {
       try {
-        const response = await api.get("/mood/logs");
-        const logs = response.data;
+        const [moodRes, chatRes] = await Promise.all([
+          api.get("/mood/logs"),
+          api.get("/chat/history?per_page=5000")
+        ]);
+        
+        const logs = moodRes.data.data || [];
+        const chats = chatRes.data.history || [];
+
         const moodLogsCount = logs.length;
-        // Group by day to get active days
-        const activeDaysCount = new Set(logs.map(log => new Date(log.timestamp).toDateString())).size;
+        const chatSessionsCount = chatRes.data.total || 0;
+
+        // Group by day to get combined active days
+        const activeDates = new Set([
+          ...logs.map(log => new Date(log.timestamp).toDateString()),
+          ...chats.map(chat => new Date(chat.timestamp).toDateString())
+        ]);
+        
+        const activeDaysCount = activeDates.size;
         
         let currentMood = null;
         if (logs.length > 0) {
-          currentMood = logs[0].mood_emoji; 
+          currentMood = logs[logs.length - 1].mood_emoji; 
         }
 
         setDashboardStats({
-          activeDays: activeDaysCount || 4, // fallback to mock if 0 
-          moodLogs: moodLogsCount || 7,     // fallback to mock if 0
-          chatSessions: 7,                  // mock
+          activeDays: activeDaysCount,
+          moodLogs: moodLogsCount,
+          chatSessions: chatSessionsCount,
           currentMood: currentMood,
         });
       } catch (error) {

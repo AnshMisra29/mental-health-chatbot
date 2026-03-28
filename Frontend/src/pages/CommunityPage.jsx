@@ -148,8 +148,8 @@ const CommunityPage = () => {
                 onClick={() =>
                   dispatch(
                     openModal({
-                      type: "mood",
-                      data: { title: `Feeling ${mood.label}` },
+                      type: "mood_entry",
+                      data: { label: mood.label, emoji: mood.emoji },
                     }),
                   )
                 }
@@ -187,7 +187,7 @@ const CommunityPage = () => {
                 onClick={() =>
                   dispatch(
                     openModal({
-                      type: "resource",
+                      type: "Insight",
                       data: { title: "Daily Reflection" },
                     }),
                   )

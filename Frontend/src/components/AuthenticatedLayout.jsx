@@ -31,7 +31,6 @@ const AuthenticatedLayout = ({ children }) => {
     { name: "Dashboard", icon: LayoutIcon, path: "/dashboard" },
     { name: "Sia Chat", icon: MessageCircle, path: "/chat" },
     { name: "Community", icon: Users, path: "/community" },
-    { name: "Resources", icon: BookOpen, path: "/community" },
     { name: "Mood Tracker", icon: BarChart2, path: "/mood-tracker" },
   ];
 
@@ -56,11 +55,10 @@ const AuthenticatedLayout = ({ children }) => {
     <div className="flex h-screen bg-background text-foreground overflow-hidden transition-colors duration-300">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-80 bg-card/60 backdrop-blur-2xl border-r border-border/60 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-80 bg-card/60 backdrop-blur-2xl border-r border-border/60 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] transform shadow-2xl ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide">
           <div className="p-10 flex items-center justify-between">
             <Link
               to="/"
@@ -76,7 +74,7 @@ const AuthenticatedLayout = ({ children }) => {
             </Link>
           </div>
 
-          <nav className="flex-1 px-8 space-y-3 mt-10">
+          <nav className="flex-1 px-8 space-y-3 mt-10 pb-4">
             <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/20 mb-6 px-4">
               Main Navigation
             </div>
@@ -87,11 +85,10 @@ const AuthenticatedLayout = ({ children }) => {
                   key={item.name}
                   to={item.path}
                   onClick={() => dispatch(setSidebarOpen(false))}
-                  className={`flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 group relative ${
-                    isActive
+                  className={`flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 group relative ${isActive
                       ? "bg-cyan-600/5 text-cyan-600 shadow-sm border border-cyan-400/20"
                       : "text-foreground/40 hover:text-cyan-600 hover:bg-cyan-500/5"
-                  }`}
+                    }`}
                 >
                   <item.icon
                     className={`w-6 h-6 transition-transform duration-500 group-hover:scale-110 ${isActive ? "text-cyan-600" : "text-foreground/25"}`}
@@ -182,7 +179,7 @@ const AuthenticatedLayout = ({ children }) => {
               <h1 className="text-sm font-bold text-foreground leading-tight">
                 {location.pathname === "/chat"
                   ? "Empathy & Support"
-                  : "Good morning, " + (user?.name?.split(" ")[0] || "User")}
+                  : "Welcome back"}
               </h1>
             </div>
           </div>
@@ -244,7 +241,7 @@ const AuthenticatedLayout = ({ children }) => {
                 <Heart className="w-8 h-8 text-cyan-600 fill-cyan-600/20" />
               </div>
               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-600 mb-2">
-                {modal.data?.type || "Resources"}
+                {modal.data?.type || "Community"}
               </h4>
               <h2 className="text-4xl font-black font-heading tracking-tighter text-foreground leading-tight">
                 {modal.data?.title || "Sia Support"}
@@ -252,19 +249,19 @@ const AuthenticatedLayout = ({ children }) => {
             </div>
 
             {modal.data?.type === "community_post" ? (
-              <CommunityPostForm 
-                onClose={() => dispatch(closeModal())} 
+              <CommunityPostForm
+                onClose={() => dispatch(closeModal())}
                 initialData={modal.data}
               />
             ) : modal.data?.type === "mood_entry" ? (
-              <MoodEntryForm 
-                mood={modal.data} 
-                onClose={() => dispatch(closeModal())} 
+              <MoodEntryForm
+                mood={modal.data}
+                onClose={() => dispatch(closeModal())}
               />
             ) : modal.data?.type === "confirm_delete" ? (
-              <ConfirmDeleteModal 
-                postId={modal.data.id} 
-                onClose={() => dispatch(closeModal())} 
+              <ConfirmDeleteModal
+                postId={modal.data.id}
+                onClose={() => dispatch(closeModal())}
               />
             ) : (
               <>
@@ -323,8 +320,8 @@ const CommunityPostForm = ({ onClose, initialData }) => {
       <div className="relative group">
         <label className="block text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-3">Category</label>
         <div className="relative">
-          <select 
-            value={category} 
+          <select
+            value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="w-full p-4 pr-12 rounded-2xl bg-background border border-border/60 text-sm font-bold focus:border-cyan-500 outline-none transition-all appearance-none cursor-pointer"
           >
@@ -339,9 +336,9 @@ const CommunityPostForm = ({ onClose, initialData }) => {
       </div>
       <div>
         <label className="block text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-3">Title</label>
-        <input 
-          type="text" 
-          value={title} 
+        <input
+          type="text"
+          value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
           placeholder="Give your story a title..."
@@ -350,8 +347,8 @@ const CommunityPostForm = ({ onClose, initialData }) => {
       </div>
       <div>
         <label className="block text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-3">Content</label>
-        <textarea 
-          value={content} 
+        <textarea
+          value={content}
           onChange={(e) => setContent(e.target.value)}
           required
           rows={4}
@@ -379,10 +376,10 @@ const MoodEntryForm = ({ mood, onClose }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post("/mood/logs", { 
-        mood_label: mood.label, 
+      await api.post("/mood/logs", {
+        mood_label: mood.label,
         mood_emoji: mood.emoji,
-        note 
+        note
       });
       onClose();
       window.dispatchEvent(new Event("mood-updated"));
@@ -401,8 +398,8 @@ const MoodEntryForm = ({ mood, onClose }) => {
       </div>
       <div>
         <label className="block text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-3">Add a note (optional)</label>
-        <textarea 
-          value={note} 
+        <textarea
+          value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={3}
           placeholder="How was your day?"
@@ -444,7 +441,7 @@ const ConfirmDeleteModal = ({ postId, onClose }) => {
       </div>
       <h3 className="text-2xl font-black mb-4 font-heading tracking-tight">Delete Post?</h3>
       <p className="text-foreground/50 mb-8 font-medium">Are you sure you want to delete this post? This action cannot be undone.</p>
-      
+
       <div className="flex gap-4">
         <button
           onClick={onClose}
