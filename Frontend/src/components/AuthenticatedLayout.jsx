@@ -119,25 +119,28 @@ const AuthenticatedLayout = ({ children }) => {
           </nav>
 
           <div className="p-8 border-t border-border/60">
-            <div className="p-6 rounded-[2rem] bg-foreground/5 border border-border/60 mb-8 group hover:bg-cyan-500/5 transition-all duration-500">
+            <Link 
+              to="/profile" 
+              onClick={() => dispatch(setSidebarOpen(false))}
+              className="block p-6 rounded-[2rem] bg-foreground/5 border border-border/60 mb-8 group hover:bg-cyan-500/5 hover:border-cyan-500/20 transition-all duration-500"
+            >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-400 flex items-center justify-center text-white font-black text-xs shadow-md group-hover:scale-110 transition-transform">
                   {user?.name?.[0] || "U"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-black text-foreground truncate uppercase tracking-widest">
+                  <p className="text-xs font-black text-foreground truncate uppercase tracking-widest mt-1 group-hover:text-cyan-600 transition-colors">
                     {user?.name || "User"}
-                  </p>
-                  <p className="text-[10px] text-foreground/30 font-black uppercase tracking-tighter">
-                    Pro member
                   </p>
                 </div>
               </div>
-            </div>
+            </Link>
             <button
               onClick={() => {
+                sessionStorage.removeItem("moodLoggedThisSession");
                 dispatch(logout());
                 dispatch(setSidebarOpen(false));
+                navigate("/");
               }}
               className="w-full flex items-center gap-4 px-6 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] text-rose-500/40 hover:text-rose-600 hover:bg-rose-500/5 transition-all border border-transparent hover:border-rose-400/20"
             >

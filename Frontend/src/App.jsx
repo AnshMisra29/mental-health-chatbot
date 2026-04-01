@@ -16,6 +16,7 @@ import MoodTrackerPage from "./pages/MoodTrackerPage";
 import ChatPage from "./pages/ChatPage";
 import HelpPage from "./pages/HelpPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import ProfilePage from "./pages/ProfilePage";
 
 // Component Imports
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -43,6 +44,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />

@@ -13,6 +13,7 @@ class User(db.Model):
     name          = db.Column(db.String(100), nullable=False)
     email         = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
+    profile_picture = db.Column(db.Text, nullable=True)
     phone         = db.Column(db.String(20), nullable=True)   # optional — included in doctor alert emails
     is_verified   = db.Column(db.Boolean, default=False)
     verification_token = db.Column(db.String(100), nullable=True)

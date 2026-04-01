@@ -18,9 +18,12 @@ import {
   CloudLightning,
   TrendingUp,
   Zap,
+  BookOpen,
+  X,
 } from "lucide-react";
 
 const MotionDiv = motion.div;
+const MotionButton = motion.button;
 
 const DashboardPage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -38,12 +41,13 @@ const DashboardPage = () => {
     chatSessions: 0,
     currentMood: null,
   });
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        // 1. Get location based on IP
-        const locationRes = await fetch("https://ipapi.co/json/");
+        // 1. Get location based on IP (using geojs for better rate limits)
+        const locationRes = await fetch("https://get.geojs.io/v1/ip/geo.json");
         const locationData = await locationRes.json();
         const { city, latitude, longitude } = locationData;
 
@@ -131,11 +135,15 @@ const DashboardPage = () => {
         
         const activeDaysCount = activeDates.size;
         
-        let currentMood = "😌"; // Default fallback
+        let currentMood = null; 
         if (logs.length > 0) {
           // Sort by timestamp descending to get the absolute latest entry first
           const sortedLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-          currentMood = sortedLogs[0].mood_emoji;
+          
+          // Check our reliable session flag to see if they logged a mood since logging in
+          if (sessionStorage.getItem("moodLoggedThisSession") === "true") {
+            currentMood = sortedLogs[0].mood_emoji;
+          }
         }
 
         setDashboardStats({
@@ -143,7 +151,7 @@ const DashboardPage = () => {
           moodLogs: moodLogsCount,
           chatSessions: chatSessionsCount,
           currentMood: currentMood,
-          recentLogs: logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5),
+          recentLogs: logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)),
           recentChats: chats.slice(-5).reverse()
         });
       } catch (error) {
@@ -296,15 +304,15 @@ const DashboardPage = () => {
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-12">
+        <div className="space-y-16">
           {/* Main Focus / Recommendations */}
-          <div className="lg:col-span-2 space-y-12">
+          <div>
             <section>
               <h2 className="text-xl md:text-2xl font-black font-heading tracking-tight mb-8 flex items-center gap-3">
                 <TrendingUp className="w-6 h-6 text-cyan-500" /> Recommended For
                 You
               </h2>
-              <div className="grid sm:grid-cols-2 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Link
                   to="/mood-log"
                   className="p-10 rounded-[2.5rem] bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 transition-all group relative overflow-hidden shadow-xl"
@@ -344,26 +352,25 @@ const DashboardPage = () => {
                     </span>
                   </span>
                 </Link>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-xl md:text-2xl font-black font-heading tracking-tight mb-8">
-                Recent Insights
-              </h2>
-              <div className="p-12 rounded-[3.5rem] bg-card/40 backdrop-blur-sm border border-border/60 border-dashed group hover:border-cyan-400/30 transition-all">
-                <div className="text-center py-12 max-w-sm mx-auto">
-                  <div className="w-16 h-16 rounded-3xl bg-foreground/5 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                    <Activity className="w-8 h-8 text-foreground/20" />
-                  </div>
-                  <p className="text-foreground/40 text-lg font-medium leading-relaxed mb-8">
-                    You haven't logged enough data this week to generate
-                    detailed insights.
+                <Link
+                  to="/journal"
+                  className="p-10 rounded-[2.5rem] bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 transition-all group relative overflow-hidden shadow-xl"
+                >
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[4rem] rounded-full translate-x-1/3 -translate-y-1/3 group-hover:bg-white/15 transition-all duration-700" />
+                  <BookOpen className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform" />
+                  <h3 className="text-2xl font-black text-white mb-3">
+                    Write in Journal
+                  </h3>
+                  <p className="text-white/80 text-lg leading-relaxed mb-8 font-medium">
+                    Jot down your thoughts and reflect on your day.
                   </p>
-                  <button className="px-8 py-4 rounded-3xl bg-foreground/5 text-foreground hover:bg-cyan-500 hover:text-white text-sm font-black uppercase tracking-widest transition-all">
-                    Complete today’s check-in
-                  </button>
-                </div>
+                  <span className="text-sm font-black uppercase tracking-widest text-white/90 flex items-center gap-2">
+                    Start Now{" "}
+                    <span className="group-hover:translate-x-2 transition-transform">
+                      →
+                    </span>
+                  </span>
+                </Link>
               </div>
             </section>
           </div>
@@ -373,14 +380,14 @@ const DashboardPage = () => {
             <h2 className="text-xl md:text-2xl font-black font-heading tracking-tight mb-8">
               Recent Activity
             </h2>
-            <div className="space-y-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {recentActivities.map((activity, i) => (
                 <MotionDiv
-                  key={activity.title}
+                  key={activity.title + i}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 + i * 0.1 }}
-                  whileHover={{ x: 10 }}
+                  whileHover={{ y: -5 }}
                   className="flex items-center gap-4 p-6 rounded-[2rem] bg-card border border-border/60 shadow-soft hover:shadow-xl hover:border-cyan-400/20 transition-all group"
                 >
                   <div className="w-14 h-14 min-w-[3.5rem] rounded-2xl bg-foreground/5 flex items-center justify-center text-3xl shadow-inner group-hover:scale-110 transition-transform">
@@ -396,19 +403,71 @@ const DashboardPage = () => {
                   </div>
                 </MotionDiv>
               ))}
-              <Link
-                to="/mood-log"
-                className="block text-center p-6 rounded-[2rem] border border-border/60 text-foreground/40 text-[10px] font-black uppercase tracking-[0.2em] hover:text-cyan-600 hover:border-cyan-400/20 hover:bg-cyan-500/5 transition-all"
+              <button
+                onClick={() => setShowHistoryModal(true)}
+                className="flex items-center justify-center text-center p-6 rounded-[2rem] border border-border/60 border-dashed text-foreground/40 text-[10px] font-black uppercase tracking-[0.2em] hover:text-cyan-600 hover:border-cyan-400/20 hover:bg-cyan-500/5 transition-all w-full h-full min-h-[104px]"
               >
                 View Full History
-              </Link>
+              </button>
             </div>
           </div>
         </div>
-        <div className="text-[10px] text-foreground/20 font-black uppercase tracking-[0.3em] text-center py-20 border-t border-border/10">
-          Mind Sync v1.0.3 • Rebranded & Synchronized
-        </div>
       </div>
+
+      {/* FULL HISTORY MODAL */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-0">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowHistoryModal(false)}
+            className="absolute inset-0 bg-background/80 backdrop-blur-md"
+          />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="relative w-full max-w-2xl bg-card border border-border/60 rounded-[3rem] shadow-2xl overflow-hidden p-8 md:p-12"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-black font-heading tracking-tight leading-tight">
+                Full History
+              </h2>
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="text-foreground/20 hover:text-foreground transition-colors p-2"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
+              {dashboardStats.recentLogs && dashboardStats.recentLogs.length > 0 ? (
+                dashboardStats.recentLogs.map((log, i) => (
+                  <div key={log.id || i} className="flex items-center gap-4 p-5 rounded-[2rem] bg-background/50 border border-border/40">
+                    <div className="w-12 h-12 min-w-[3rem] rounded-2xl bg-foreground/5 flex items-center justify-center text-2xl shadow-inner">
+                      {log.mood_emoji || "😌"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-base font-black text-foreground truncate font-heading tracking-tight">
+                        Mood Logged: {log.mood_label}
+                      </h4>
+                      <p className="text-[10px] text-foreground/40 uppercase font-black tracking-widest mt-1">
+                        {new Date(log.timestamp).toLocaleDateString()} · {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-foreground/50 font-medium">No mood history available.</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AuthenticatedLayout>
   );
 };

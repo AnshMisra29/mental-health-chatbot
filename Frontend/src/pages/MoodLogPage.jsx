@@ -71,6 +71,7 @@ const MoodLogPage = () => {
       setLastLoggedId(mood.label);
       
       // Dispatch a fresh event that the Dashboard is GUARANTEED to hear
+      sessionStorage.setItem("moodLoggedThisSession", "true");
       window.dispatchEvent(new CustomEvent("mood-updated", { detail: { emoji: mood.emoji } }));
       
       // Special logic for Sia's positive reinforcement

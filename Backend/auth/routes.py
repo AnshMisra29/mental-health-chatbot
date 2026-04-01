@@ -103,7 +103,8 @@ def login():
         "user": {
             "id": user.id,
             "name": user.name,
-            "email": user.email
+            "email": user.email,
+            "profile_picture": user.profile_picture
         }
     }), 200
 
@@ -278,6 +279,86 @@ def me():
         "id":         user.id,
         "name":       user.name,
         "email":      user.email,
+        "profile_picture": user.profile_picture,
         "is_verified": user.is_verified,
         "created_at": user.created_at.isoformat()
     }), 200
+
+
+# ── POST /api/auth/change-password ───────────────────────────────────────────
+@auth_bp.route("/change-password", methods=["POST"])
+@jwt_required()
+def change_password():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json() or {}
+    current_password = data.get("current_password", "")
+    new_password = data.get("new_password", "")
+
+    if not current_password or not new_password:
+        return jsonify({"error": "All fields are required"}), 400
+
+    if not user.check_password(current_password):
+        return jsonify({"error": "Incorrect current password"}), 400
+
+    if len(new_password) < 6:
+        return jsonify({"error": "New password must be at least 6 characters long"}), 400
+
+    user.set_password(new_password)
+    db.session.commit()
+
+    return jsonify({"message": "Password updated successfully"}), 200
+
+
+# ── DELETE /api/auth/delete-account ──────────────────────────────────────────
+@auth_bp.route("/delete-account", methods=["DELETE"])
+@jwt_required()
+def delete_account():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+    
+    return jsonify({"message": "Account deleted successfully"}), 200
+
+
+# ── POST /api/auth/profile-picture ───────────────────────────────────────────
+@auth_bp.route("/profile-picture", methods=["POST"])
+@jwt_required()
+def update_profile_picture():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json() or {}
+    picture_data = data.get("picture", None)
+
+    if not picture_data:
+        return jsonify({"error": "No picture data provided"}), 400
+
+    user.profile_picture = picture_data
+    db.session.commit()
+
+    return jsonify({"message": "Profile picture updated successfully", "profile_picture": user.profile_picture}), 200
+
+
+# ── DELETE /api/auth/profile-picture ───────────────────────────────────────────
+@auth_bp.route("/profile-picture", methods=["DELETE"])
+@jwt_required()
+def delete_profile_picture():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    user.profile_picture = None
+    db.session.commit()
+
+    return jsonify({"message": "Profile picture removed successfully"}), 200
