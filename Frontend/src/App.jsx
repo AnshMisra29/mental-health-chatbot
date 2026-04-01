@@ -11,7 +11,8 @@ import { useSelector } from "react-redux";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
-import CommunityPage from "./pages/CommunityPage";
+import MoodLogPage from "./pages/MoodLogPage";
+import MoodTrackerPage from "./pages/MoodTrackerPage";
 import ChatPage from "./pages/ChatPage";
 import HelpPage from "./pages/HelpPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
@@ -46,10 +47,10 @@ function App() {
             }
           />
           <Route
-            path="/community"
+            path="/mood-log"
             element={
               <ProtectedRoute>
-                <CommunityPage />
+                <MoodLogPage />
               </ProtectedRoute>
             }
           />
@@ -62,6 +63,14 @@ function App() {
             }
           />
           <Route
+            path="/journal"
+            element={
+              <ProtectedRoute>
+                <MoodTrackerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/help"
             element={
               <ProtectedRoute>
@@ -69,6 +78,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Backward-compat redirects for old paths */}
+          <Route path="/community" element={<Navigate to="/mood-log" replace />} />
+          <Route path="/mood-tracker" element={<Navigate to="/journal" replace />} />
 
           {/* Fallback Catch-all */}
           <Route

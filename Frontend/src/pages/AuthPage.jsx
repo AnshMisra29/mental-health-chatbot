@@ -195,7 +195,7 @@ const AuthPage = () => {
             <div className="w-16 h-16 rounded-[2rem] bg-gradient-to-br from-cyan-600 to-emerald-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500">
               <Heart className="w-8 h-8 text-white fill-current" />
             </div>
-            <span className="text-4xl font-black font-heading tracking-tighter">Aurora</span>
+            <span className="text-4xl font-black font-heading tracking-tighter">Mind Sync</span>
           </Link>
           <h2 className="text-4xl md:text-5xl font-black text-foreground font-heading tracking-tight mb-4 leading-tight">
             {forgotPassword ? "Security first" : (isLogin ? "Welcome back" : "Start your journey")}

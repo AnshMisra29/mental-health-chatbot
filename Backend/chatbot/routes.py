@@ -23,7 +23,8 @@ def chat():
         result = get_chatbot_response(user_id, message)
         return jsonify(result), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        # Groq timed out or failed — return 503 so the frontend shows a retry button
+        return jsonify({"error": "sia_unavailable", "message": "Sia couldn't respond right now. Please try again."}), 503
 
 @chatbot_bp.route('/reset', methods=['POST'])
 @jwt_required()

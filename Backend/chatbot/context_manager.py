@@ -1,5 +1,5 @@
 class ContextManager:
-    def __init__(self, max_history=10):
+    def __init__(self, max_history=5):
         self.history = {}  # user_id -> list of messages
         self.max_history = max_history
 

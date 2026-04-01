@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useCallback, useMemo } from "react"; // Added useMemo to force re-evaluation
+// Version: 1.0.2 - Rebranding Force Update
+
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   BarChart2,
@@ -11,6 +13,7 @@ import {
   Heart,
   Layout as LayoutIcon,
   BookOpen,
+  Notebook,
   ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,6 +21,7 @@ import { setSidebarOpen, closeModal } from "../features/ui/uiSlice";
 import { logout } from "../features/auth/authSlice";
 import ThemeToggle from "./ThemeToggle";
 import api from "../services/api";
+import useInactivityTimer from "../hooks/useInactivityTimer";
 
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
@@ -26,12 +30,22 @@ const AuthenticatedLayout = ({ children }) => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Log the user out and redirect to login after 15 minutes of inactivity.
+  // useCallback keeps the reference stable so the timer doesn't reset on re-renders.
+  const handleInactivityTimeout = useCallback(() => {
+    dispatch(logout());
+    navigate("/", { replace: true });
+  }, [dispatch, navigate]);
+
+  useInactivityTimer(handleInactivityTimeout);
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutIcon, path: "/dashboard" },
     { name: "Sia Chat", icon: MessageCircle, path: "/chat" },
-    { name: "Community", icon: Users, path: "/community" },
-    { name: "Mood Tracker", icon: BarChart2, path: "/mood-tracker" },
+    { name: "Mood Log", icon: BarChart2, path: "/mood-log" },
+    { name: "Journal", icon: Notebook, path: "/journal" },
   ];
 
   const getPageTitle = () => {
@@ -40,10 +54,10 @@ const AuthenticatedLayout = ({ children }) => {
         return "Your Journey";
       case "/chat":
         return "AI Companion";
-      case "/community":
-        return "Wellness Feed";
-      case "/mood-tracker":
-        return "Mood Tracker";
+      case "/mood-log":
+        return "Mood Log";
+      case "/journal":
+        return "Journal";
       case "/help":
         return "Support center";
       default:
@@ -69,7 +83,7 @@ const AuthenticatedLayout = ({ children }) => {
                 <Heart className="w-6 h-6 text-white fill-current" />
               </div>
               <span className="text-2xl font-black font-heading tracking-tighter text-foreground pl-1">
-                Aurora
+                Mind Sync
               </span>
             </Link>
           </div>
@@ -93,7 +107,7 @@ const AuthenticatedLayout = ({ children }) => {
                   <item.icon
                     className={`w-6 h-6 transition-transform duration-500 group-hover:scale-110 ${isActive ? "text-cyan-600" : "text-foreground/25"}`}
                   />
-                  <span className="text-xs font-black uppercase tracking-widest">
+                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors leading-none ${isActive ? 'text-cyan-600' : 'text-foreground/40 group-hover:text-foreground/80'}`}>
                     {item.name}
                   </span>
                   {isActive && (
@@ -241,15 +255,15 @@ const AuthenticatedLayout = ({ children }) => {
                 <Heart className="w-8 h-8 text-cyan-600 fill-cyan-600/20" />
               </div>
               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-600 mb-2">
-                {modal.data?.type || "Community"}
+                {modal.data?.type || "Mood Log"}
               </h4>
               <h2 className="text-4xl font-black font-heading tracking-tighter text-foreground leading-tight">
                 {modal.data?.title || "Sia Support"}
               </h2>
             </div>
 
-            {modal.data?.type === "community_post" ? (
-              <CommunityPostForm
+            {modal.data?.type === "Mood Log Post" ? (
+              <MoodLogPostForm
                 onClose={() => dispatch(closeModal())}
                 initialData={modal.data}
               />
@@ -295,7 +309,7 @@ const AuthenticatedLayout = ({ children }) => {
   );
 };
 
-const CommunityPostForm = ({ onClose, initialData }) => {
+const MoodLogPostForm = ({ onClose, initialData }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState(initialData?.category || "Stories");
@@ -307,7 +321,7 @@ const CommunityPostForm = ({ onClose, initialData }) => {
     try {
       await api.post("/community/posts", { title, content, category });
       onClose();
-      window.dispatchEvent(new Event("community-post-created"));
+      window.dispatchEvent(new Event("mood-log-post-created"));
     } catch (error) {
       console.error("Error creating post:", error);
     } finally {
@@ -426,7 +440,7 @@ const ConfirmDeleteModal = ({ postId, onClose }) => {
     try {
       await api.delete(`/community/posts/${postId}`);
       onClose();
-      window.dispatchEvent(new Event("community-post-created"));
+      window.dispatchEvent(new Event("mood-log-post-created"));
     } catch (error) {
       console.error("Error deleting post:", error);
     } finally {

@@ -31,6 +31,7 @@ const initialState = {
   messages: [],
   isTyping: false,
   error: null,
+  failedMessage: null,   // stores the message text that failed so UI can offer retry
   historyLoading: false,
   historyError: null,
   totalMessages: 0,
@@ -51,6 +52,9 @@ const chatSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    clearFailedMessage: (state) => {
+      state.failedMessage = null;
     }
   },
   extraReducers: (builder) => {
@@ -62,6 +66,7 @@ const chatSlice = createSlice({
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
         state.isTyping = false;
+        state.failedMessage = null; // clear retry state on success
         const aiMessage = {
           id: `a-${Date.now()}`,
           text: action.payload.response,
@@ -81,6 +86,8 @@ const chatSlice = createSlice({
       .addCase(sendMessage.rejected, (state, action) => {
         state.isTyping = false;
         state.error = action.payload;
+        // Keep failedMessage set by the thunk arg so the UI can offer a retry
+        state.failedMessage = action.meta.arg.message;
       })
       // Fetch history cases
       .addCase(fetchChatHistory.pending, (state) => {
@@ -136,5 +143,5 @@ const chatSlice = createSlice({
   },
 });
 
-export const { addMessage, setTyping, clearChat, clearError } = chatSlice.actions;
+export const { addMessage, setTyping, clearChat, clearError, clearFailedMessage } = chatSlice.actions;
 export default chatSlice.reducer;

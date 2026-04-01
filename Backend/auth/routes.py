@@ -271,7 +271,8 @@ def me():
     user    = db.session.get(User, user_id)
 
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        # Crucial for sync: if user is not in DB after a wipe, force them to re-login
+        return jsonify({"error": "User not found", "msg": "Sync required"}), 401
 
     return jsonify({
         "id":         user.id,

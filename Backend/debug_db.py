@@ -1,29 +1,17 @@
-import sqlite3
-import os
+from app import app
+from database.db import db
+from sqlalchemy import inspect
+from database.models import MoodLog
 
-db_path = "instance/mental_health.db"
-if not os.path.exists(db_path):
-    print(f"ERROR: DB file not found at {db_path}")
-else:
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+with app.app_context():
+    inspector = inspect(db.engine)
+    tables = inspector.get_table_names()
+    print(f"Tables found: {tables}")
     
-    print("--- TABLES ---")
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = cursor.fetchall()
-    for t in tables:
-        print(t[0])
-        
-    print("\n--- USERS SCHEMA ---")
-    cursor.execute("PRAGMA table_info(users);")
-    columns = cursor.fetchall()
-    for col in columns:
-        print(col)
-        
-    print("\n--- DOCTORS SCHEMA ---")
-    cursor.execute("PRAGMA table_info(doctors);")
-    columns = cursor.fetchall()
-    for col in columns:
-        print(col)
-    
-    conn.close()
+    if "mood_logs" in tables:
+        cols = [c["name"] for c in inspector.get_columns("mood_logs")]
+        print(f"MoodLog columns: {cols}")
+        count = MoodLog.query.count()
+        print(f"Total Mood Logs: {count}")
+    else:
+        print("MoodLog table is MISSING!")

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import {
   Heart,
@@ -20,7 +20,7 @@ const Footer = () => {
                 <Heart className="w-6 h-6 text-white fill-current" />
               </div>
               <span className="text-2xl font-black font-heading tracking-tighter">
-                Aurora
+                Mind Sync
               </span>
             </Link>
             <p className="text-foreground/40 text-lg font-medium max-w-sm mb-10 leading-relaxed">
@@ -58,10 +58,10 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/community"
+                  to="/mood-log"
                   className="hover:text-cyan-600 transition-colors"
                 >
-                  Community
+                  Mood Log
                 </Link>
               </li>
               <li>
@@ -131,7 +131,7 @@ const Footer = () => {
 
         <div className="pt-12 border-t border-border/60 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/20">
-            © 2026 Aurora. All rights reserved.
+            © 2026 Mind Sync. All rights reserved.
           </p>
           <div className="flex gap-8">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/20 hover:text-cyan-600 cursor-pointer transition-colors">

@@ -22,8 +22,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Features", href: "#features" },
-    { name: "Community", href: "/community" },
-    { name: "Awareness", href: "/community" },
+    { name: "Mood Log", href: "/mood-log" },
     { name: "Help", href: "#help" },
   ];
 
@@ -41,7 +40,7 @@ const Navbar = () => {
             <Heart className="w-6 h-6 text-white fill-current" />
           </div>
           <span className="text-2xl font-black font-heading tracking-tighter">
-            Aurora
+            Mind Sync
           </span>
         </Link>
 

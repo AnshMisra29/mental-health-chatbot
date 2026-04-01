@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Navbar from "../components/Navbar";
@@ -33,7 +33,7 @@ const LandingPage = () => {
 
   const handleExploreTools = () => {
     if (isAuthenticated) {
-      navigate("/community");
+      navigate("/mood-log");
     } else {
       navigate("/auth");
     }
@@ -193,8 +193,8 @@ const LandingPage = () => {
                   color: "from-emerald-600 to-emerald-400",
                 },
                 {
-                  title: "Safe Community",
-                  desc: "Stigma-free zones where users share stories and find support in a moderated environment.",
+                  title: "Mood Log & Insights",
+                  desc: "Log your daily emotions and explore evidence-based stories and tips to aid your wellness journey.",
                   icon: Users,
                   color: "from-blue-600 to-blue-400",
                 },

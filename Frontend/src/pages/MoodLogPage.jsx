@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen,
   Sparkles,
@@ -11,6 +12,7 @@ import {
   ArrowRight,
   MessageSquare,
   Trash2,
+  X,
 } from "lucide-react";
 import { openModal } from "../features/ui/uiSlice";
 import api from "../services/api";
@@ -18,9 +20,22 @@ import api from "../services/api";
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
 
-const CommunityPage = () => {
+const MoodLogPage = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("All");
+  const [loggingMood, setLoggingMood] = useState(false);
+  const [lastLoggedId, setLastLoggedId] = useState(null);
+  const [siaMoodResponse, setSiaMoodResponse] = useState(null);
+  const [activeJoke, setActiveJoke] = useState("");
+
+  const jokes = [
+    "Why don't scientists trust atoms? Because they make up everything!",
+    "What do you call a fake noodle? An impasta!",
+    "Why did the scarecrow win an award? Because he was outstanding in his field!",
+    "How does a penguin build its house? Igloos it together!",
+    "What do you call a bear with no teeth? A gummy bear!",
+  ];
   const tabs = [
     "All",
     "Tips",
@@ -36,11 +51,41 @@ const CommunityPage = () => {
   const fetchPosts = async () => {
     try {
       const { data } = await api.get("/community/posts");
-      setPosts(data);
+      setPosts(data.data || []);
     } catch (error) {
       console.error("Error fetching posts:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMoodLog = async (mood) => {
+    if (loggingMood) return;
+    setLoggingMood(true);
+    try {
+      await api.post("/mood/logs", {
+        mood_label: mood.label,
+        mood_emoji: mood.emoji,
+      });
+
+      setLastLoggedId(mood.label);
+      
+      // Dispatch a fresh event that the Dashboard is GUARANTEED to hear
+      window.dispatchEvent(new CustomEvent("mood-updated", { detail: { emoji: mood.emoji } }));
+      
+      // Special logic for Sia's positive reinforcement
+      if (mood.label === "Happy" || mood.label === "Calm") {
+        setSiaMoodResponse(mood.label);
+      } else if (mood.label === "Neutral") {
+        setSiaMoodResponse("Neutral");
+        const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+        setActiveJoke(randomJoke);
+      } else if (mood.label === "Sad" || mood.label === "Stressed") {
+        setSiaMoodResponse(mood.label);
+      }
+      
+    } finally {
+      setLoggingMood(false);
     }
   };
 
@@ -88,10 +133,10 @@ const CommunityPage = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16">
           <div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-heading tracking-tight mb-4">
-              Mental Health Awareness
+              Mood Log
             </h1>
             <p className="text-foreground/50 text-xl font-medium">
-              Discover tips, stories, and tools to help you thrive.
+              Share, explore, and track your emotional wellness journey.
             </p>
           </div>
           <MotionButton
@@ -99,7 +144,7 @@ const CommunityPage = () => {
             whileTap={{ scale: 0.95 }}
             onClick={() =>
               dispatch(
-                openModal({ type: "community_post", data: { category: activeTab === "All" ? "Stories" : activeTab } }),
+                openModal({ type: "Mood Log Post", data: { category: activeTab === "All" ? "Stories" : activeTab } }),
               )
             }
             className="px-8 py-4 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-black uppercase tracking-widest text-xs transition-all shadow-xl flex items-center gap-3 w-fit"
@@ -145,21 +190,25 @@ const CommunityPage = () => {
               <MotionDiv
                 key={mood.label}
                 whileHover={{ y: -5 }}
-                onClick={() =>
-                  dispatch(
-                    openModal({
-                      type: "mood_entry",
-                      data: { label: mood.label, emoji: mood.emoji },
-                    }),
-                  )
-                }
-                className={`flex-1 min-w-[140px] p-8 rounded-[2rem] bg-card border border-border/60 transition-all flex flex-col items-center gap-4 group cursor-pointer shadow-soft hover:shadow-xl ${mood.color}`}
+                onClick={() => handleMoodLog(mood)}
+                className={`flex-1 min-w-[140px] p-8 rounded-[2rem] bg-card border transition-all flex flex-col items-center gap-4 group cursor-pointer shadow-soft hover:shadow-xl ${mood.color} ${loggingMood ? 'opacity-50 pointer-events-none' : ''} ${lastLoggedId === mood.label ? 'border-cyan-500 bg-cyan-500/5 ring-4 ring-cyan-500/10' : 'border-border/60'}`}
               >
-                <span className="text-5xl group-hover:scale-125 transition-transform duration-500">
-                  {mood.emoji}
-                </span>
-                <span className="text-[10px] font-black text-foreground/40 group-hover:text-foreground uppercase tracking-[0.2em]">
-                  {mood.label}
+                <div className="relative">
+                  <span className="text-5xl group-hover:scale-125 transition-transform duration-500 block">
+                    {mood.emoji}
+                  </span>
+                  {lastLoggedId === mood.label && (
+                    <motion.div 
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="absolute -top-2 -right-2 bg-cyan-600 text-white p-1 rounded-full shadow-lg"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                    </motion.div>
+                  )}
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${lastLoggedId === mood.label ? 'text-cyan-600' : 'text-foreground/40 group-hover:text-foreground'}`}>
+                  {lastLoggedId === mood.label ? 'Logged!' : mood.label}
                 </span>
               </MotionDiv>
             ))}
@@ -280,8 +329,111 @@ const CommunityPage = () => {
           ))}
         </div>
       </div>
+
+      {/* SIA POSITIVE/NEUTRAL RESPONSE MODAL */}
+      <AnimatePresence>
+        {siaMoodResponse && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-0">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSiaMoodResponse(null)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-lg bg-card border border-border/60 rounded-[3rem] shadow-2xl overflow-hidden p-12 text-center"
+            >
+              <div className="mb-10 flex justify-center">
+                <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-cyan-600 to-emerald-600 p-0.5 shadow-xl">
+                  <div className="w-full h-full rounded-[2rem] bg-card flex items-center justify-center">
+                    <Sparkles className="w-10 h-10 text-cyan-600" />
+                  </div>
+                </div>
+              </div>
+
+              {siaMoodResponse === "Neutral" ? (
+                <>
+                  <h2 className="text-3xl font-black font-heading tracking-tight mb-4 leading-tight">
+                    Ohh that's fine!
+                  </h2>
+                  <p className="text-foreground/80 text-lg font-medium mb-8 leading-relaxed">
+                    Wanna hear a joke to uplift your mood?
+                  </p>
+                  <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-2xl p-6 mb-8">
+                    <p className="text-cyan-600 dark:text-cyan-400 text-xl font-bold italic">
+                      "{activeJoke}"
+                    </p>
+                  </div>
+                  <p className="text-foreground/50 text-sm font-medium mb-8">
+                    Wanna hear more jokes?
+                  </p>
+                  <MotionButton
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setSiaMoodResponse(null);
+                      navigate("/chat");
+                    }}
+                    className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-black uppercase tracking-widest text-xs transition-all shadow-xl hover:shadow-cyan-500/20"
+                  >
+                    Ask Sia for it
+                  </MotionButton>
+                </>
+              ) : siaMoodResponse === "Sad" || siaMoodResponse === "Stressed" ? (
+                <>
+                  <h2 className="text-3xl font-black font-heading tracking-tight mb-6 leading-tight">
+                    We're here for you.
+                  </h2>
+                  <p className="text-foreground/80 text-lg font-medium mb-12 leading-relaxed">
+                    It's completely okay to feel <span className="text-rose-500 font-bold">{siaMoodResponse}</span>. Remember that you are not alone, and we are always here to support you through the tough times.
+                  </p>
+                  <MotionButton
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setSiaMoodResponse(null);
+                      navigate("/chat");
+                    }}
+                    className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-rose-500 to-orange-500 text-white font-black uppercase tracking-widest text-xs transition-all shadow-xl hover:shadow-rose-500/20"
+                  >
+                    Talk to Sia
+                  </MotionButton>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-3xl font-black font-heading tracking-tight mb-6 leading-tight">
+                    Glad to hear that you're feeling <span className="text-cyan-600">{siaMoodResponse}</span>!
+                  </h2>
+                  <p className="text-foreground/50 text-xl font-medium mb-12 leading-relaxed">
+                    It's wonderful to see you doing well today. Keep shining and take good care of yourself!
+                  </p>
+                  <MotionButton
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSiaMoodResponse(null)}
+                    className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-black uppercase tracking-widest text-xs transition-all shadow-xl hover:shadow-cyan-500/20"
+                  >
+                    Happy to hear
+                  </MotionButton>
+                </>
+              )}
+
+              <button
+                onClick={() => setSiaMoodResponse(null)}
+                className="absolute top-8 right-8 text-foreground/20 hover:text-foreground transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </AuthenticatedLayout>
   );
 };
 
-export default CommunityPage;
+export default MoodLogPage;

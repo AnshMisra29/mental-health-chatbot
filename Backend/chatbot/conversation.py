@@ -22,8 +22,8 @@ else:
     client = None
     print("WARNING: GROQ_API_KEY not set — Groq client disabled; using fallback responses.")
 
-# Use Llama 3 for best quality-to-speed ratio
-MODEL_ID = "llama-3.3-70b-versatile"
+# Use Llama 3.1 8B Instant — 5x faster than 70B, well within Groq free tier limits
+MODEL_ID = "llama-3.1-8b-instant"
 
 CRISIS_LABEL = "Suicidal"
 
@@ -130,12 +130,13 @@ def get_chatbot_response(user_id, message):
         # Add current message
         messages.append({"role": "user", "content": message})
         
-        # Call Groq API
+        # Call Groq API — 25s timeout prevents the Flask worker from hanging indefinitely
         chat_completion = client.chat.completions.create(
             messages=messages,
             model=MODEL_ID,
             temperature=0.7,
-            max_tokens=500
+            max_tokens=250,
+            timeout=25
         )
         
         reply = chat_completion.choices[0].message.content
@@ -168,33 +169,7 @@ def get_chatbot_response(user_id, message):
         }
         
     except Exception as e:
-        print(f"Groq API Error: {e}")
-        # Fallback Mode
-        if detected_emotion == "Normal":
-            fallback_msg = "I'm here for you and ready to listen. Would you like to tell me more about what's on your mind?"
-        else:
-            fallback_msg = f"I'm here for you. It sounds like you're dealing with {detected_emotion.lower()} right now. How can I help?"
-        
-        risk_level = get_risk_level(detected_emotion)
-        
-        # Save fallback response to DB as well
-        try:
-            chat_record = ChatHistory(
-                user_id=user_id,
-                message=message,
-                bot_response=fallback_msg,
-                emotion=detected_emotion,
-                risk_level=risk_level,
-                model_metadata=analysis
-            )
-            db.session.add(chat_record)
-            db.session.commit()
-        except Exception as db_err:
-             print(f"DEBUG: DB Fallback Save Error: {db_err}")
-
-        return {
-            "response": fallback_msg,
-            "emotion": detected_emotion,
-            "is_crisis": False,
-            "risk_level": risk_level
-        }
+        # Re-raise so the Flask route catches it and returns a proper 503 error.
+        # The frontend will show a "Try Again" button — no hardcoded response is returned.
+        print(f"Groq API Error (will 503): {e}")
+        raise

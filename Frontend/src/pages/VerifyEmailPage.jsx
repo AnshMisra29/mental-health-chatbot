@@ -83,7 +83,7 @@ const VerifyEmailPage = () => {
 
         <div className="pt-6 border-t border-slate-700/50">
           <p className="text-slate-500 text-[10px] uppercase tracking-widest font-bold">
-            Aurora Mental Health Assistant
+            Mind Sync Mental Health Assistant
           </p>
         </div>
       </div>

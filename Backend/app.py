@@ -7,21 +7,38 @@ from flask_jwt_extended import JWTManager
 
 from config import Config
 from database.db import db
+from database.db import db
+from database.models import User, CommunityPost, MoodLog  # Explicitly import models for db.create_all()
 from notifications import mail
 
 
+# Flask setup
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Allow Frontend (any origin in dev) to call the API
+# Enable CORS for All Routes (Universal for development)
+from flask_cors import CORS
 CORS(app)
 
 # JWT setup
 jwt = JWTManager(app)
 
+# Database & Mail setup
 db.init_app(app)
 migrate = Migrate(app, db)
 mail.init_app(app)
+
+with app.app_context():
+    # Safely create all missing tables (this is additive and non-destructive)
+    db.create_all()
+    print("--- BACKEND SYNC ACTIVE: Database Tables Verified ---")
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    return response
 
 
 # Import models so Flask-Migrate can detect tables
@@ -36,14 +53,17 @@ from chatbot.routes import chatbot_bp
 from mood import mood_bp
 from community import community_bp
 
+# Extra layer of CORS specifically for these blueprints before registration to avoid AssertionErrors
+CORS(mood_bp)
+CORS(community_bp)
 
 app.register_blueprint(auth_bp,      url_prefix="/api/auth")
 app.register_blueprint(alerts_bp,    url_prefix="/api/alerts")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(doctors_bp,   url_prefix="/api/doctors")
 app.register_blueprint(chatbot_bp,   url_prefix="/api/chat")
-app.register_blueprint(mood_bp,      url_prefix="/api/mood")
-app.register_blueprint(community_bp, url_prefix="/api/community")
+app.register_blueprint(mood_bp,      url_prefix="/api/mood",      strict_slashes=False)
+app.register_blueprint(community_bp, url_prefix="/api/community", strict_slashes=False)
 
 
 # ── Load ML Model ─────────────────────────────────────────────────────────────

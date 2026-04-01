@@ -110,9 +110,11 @@ const DashboardPage = () => {
 
     const fetchDashboardData = async () => {
       try {
+        // Add current timestamp as cache-buster to ensure we get fresh data
+        const now = Date.now();
         const [moodRes, chatRes] = await Promise.all([
-          api.get("/mood/logs"),
-          api.get("/chat/history?per_page=5000")
+          api.get(`/mood/logs?t=${now}`),
+          api.get(`/chat/history?per_page=5000&t=${now}`)
         ]);
         
         const logs = moodRes.data.data || [];
@@ -129,9 +131,11 @@ const DashboardPage = () => {
         
         const activeDaysCount = activeDates.size;
         
-        let currentMood = null;
+        let currentMood = "😌"; // Default fallback
         if (logs.length > 0) {
-          currentMood = logs[logs.length - 1].mood_emoji; 
+          // Sort by timestamp descending to get the absolute latest entry first
+          const sortedLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          currentMood = sortedLogs[0].mood_emoji;
         }
 
         setDashboardStats({
@@ -139,6 +143,8 @@ const DashboardPage = () => {
           moodLogs: moodLogsCount,
           chatSessions: chatSessionsCount,
           currentMood: currentMood,
+          recentLogs: logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5),
+          recentChats: chats.slice(-5).reverse()
         });
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);
@@ -180,27 +186,26 @@ const DashboardPage = () => {
     },
     {
       label: "Current Mood",
-      value: dashboardStats.currentMood || "😔",
+      value: dashboardStats.currentMood || "—",
       icon: Heart,
-      color: "text-cyan-400",
+      color: dashboardStats.currentMood ? "text-rose-500" : "text-cyan-400",
     },
   ];
 
   const recentActivities = [
-    {
-      title: "Journal Entry",
-      time: "2 hours ago",
+    ...(dashboardStats.recentLogs || []).map(log => ({
+      title: "Mood Logged",
+      time: new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       type: "Mood Log",
-      emoji: "😌",
-    },
-    { title: "Healo Session", time: "Yesterday", type: "Therapy", emoji: "💬" },
-    {
-      title: "Daily Exercise",
-      time: "2 days ago",
-      type: "Mindfulness",
-      emoji: "🧘",
-    },
-  ];
+      emoji: log.mood_emoji || "😌",
+    })),
+    ...(dashboardStats.recentLogs && dashboardStats.recentLogs.length === 0 ? [{
+      title: "No entries yet",
+      time: "Today",
+      type: "System",
+      emoji: "📝"
+    }] : [])
+  ].slice(0, 5); // Keep it clean with top 5
 
   return (
     <AuthenticatedLayout>
@@ -255,7 +260,7 @@ const DashboardPage = () => {
               </div>
             </div>
             <Link
-              to="/mood-tracker"
+              to="/mood-log"
               className="px-8 py-4 rounded-[2rem] bg-cyan-600 text-white font-black uppercase tracking-widest text-xs shadow-xl hover:bg-cyan-500 transition-all text-center"
             >
               Update Mood Now
@@ -301,7 +306,7 @@ const DashboardPage = () => {
               </h2>
               <div className="grid sm:grid-cols-2 gap-6">
                 <Link
-                  to="/community"
+                  to="/mood-log"
                   className="p-10 rounded-[2.5rem] bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 transition-all group relative overflow-hidden shadow-xl"
                 >
                   <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[4rem] rounded-full translate-x-1/3 -translate-y-1/3 group-hover:bg-white/15 transition-all duration-700" />
@@ -329,7 +334,7 @@ const DashboardPage = () => {
                     Morning Check-in
                   </h3>
                   <p className="text-foreground/50 text-lg leading-relaxed mb-8 font-medium">
-                    A quick 2-minute chat with Healo to set your day's
+                    A quick 2-minute chat with Sia to set your day's
                     intention.
                   </p>
                   <span className="text-sm font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
@@ -392,13 +397,16 @@ const DashboardPage = () => {
                 </MotionDiv>
               ))}
               <Link
-                to="/community"
+                to="/mood-log"
                 className="block text-center p-6 rounded-[2rem] border border-border/60 text-foreground/40 text-[10px] font-black uppercase tracking-[0.2em] hover:text-cyan-600 hover:border-cyan-400/20 hover:bg-cyan-500/5 transition-all"
               >
                 View Full History
               </Link>
             </div>
           </div>
+        </div>
+        <div className="text-[10px] text-foreground/20 font-black uppercase tracking-[0.3em] text-center py-20 border-t border-border/10">
+          Mind Sync v1.0.3 • Rebranded & Synchronized
         </div>
       </div>
     </AuthenticatedLayout>

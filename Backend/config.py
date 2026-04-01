@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 
 load_dotenv()  # Reads values from .env file automatically
@@ -12,6 +13,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "super-secret-jwt-key")
+    # Token lives 2 hours; frontend inactivity timer handles the 15-min logout
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=2)
     GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
     # Flask-Mail configuration

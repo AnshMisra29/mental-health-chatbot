@@ -132,8 +132,8 @@ const MoodTrackerPage = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-heading tracking-tight mb-3">
-              Mood{" "}
-              <span className="text-cyan-600 dark:text-cyan-400">Tracker</span>
+              Your{" "}
+              <span className="text-cyan-600 dark:text-cyan-400">Journal</span>
             </h1>
             <p className="text-foreground/50 text-xl font-medium">
               How are you feeling today?

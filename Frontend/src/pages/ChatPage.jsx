@@ -13,11 +13,11 @@ import {
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
 import DoctorSuggestions from "../components/DoctorSuggestions";
 import {
-
   addMessage,
   setTyping,
   sendMessage,
   clearError,
+  clearFailedMessage,
   fetchChatHistory,
 } from "../features/chat/chatSlice";
 import { logout } from "../features/auth/authSlice";
@@ -30,6 +30,7 @@ const ChatPage = () => {
     messages,
     isTyping,
     error: chatError,
+    failedMessage,
     historyLoading,
   } = useSelector((state) => state.chat);
   const { user } = useSelector((state) => state.auth);
@@ -77,6 +78,10 @@ const ChatPage = () => {
     const messageText = input.trim();
     if (!messageText) return;
 
+    // Clear any previous error/retry state before sending
+    dispatch(clearError());
+    dispatch(clearFailedMessage());
+
     const userMessage = {
       id: `u-${Date.now()}`,
       text: messageText,
@@ -89,9 +94,16 @@ const ChatPage = () => {
 
     dispatch(addMessage(userMessage));
     setInput("");
-
-    // Call real API
     dispatch(sendMessage({ message: messageText }));
+  };
+
+  // Retry the last failed message — pre-fills the input so user just hits send
+  const handleRetry = () => {
+    if (failedMessage) {
+      dispatch(clearError());
+      dispatch(clearFailedMessage());
+      setInput(failedMessage);
+    }
   };
 
   const quickReplies = [
@@ -244,6 +256,30 @@ const ChatPage = () => {
               </MotionDiv>
             ))}
           </AnimatePresence>
+
+          {/* Groq Error / Retry Banner */}
+          {chatError && failedMessage && !isTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex gap-4"
+            >
+              <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center flex-shrink-0 mt-1">
+                <Sparkles className="w-4 h-4 text-rose-400" />
+              </div>
+              <div className="max-w-[75%] space-y-2">
+                <div className="px-5 py-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm rounded-tl-none">
+                  Sia couldn't respond right now. Tap <strong>Try Again</strong> to resend your message.
+                </div>
+                <button
+                  onClick={handleRetry}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-widest transition-all"
+                >
+                  Try Again
+                </button>
+              </div>
+            </motion.div>
+          )}
 
           {isTyping && (
             <motion.div
