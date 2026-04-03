@@ -16,9 +16,9 @@ from notifications import mail
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Enable CORS for All Routes (Universal for development)
+# Enable CORS for all routes and allow common development headers/methods
 from flask_cors import CORS
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # JWT setup
 jwt = JWTManager(app)
@@ -33,12 +33,7 @@ with app.app_context():
     db.create_all()
     print("--- BACKEND SYNC ACTIVE: Database Tables Verified ---")
 
-@app.after_request
-def add_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    return response
+
 
 
 # Import models so Flask-Migrate can detect tables
@@ -53,9 +48,7 @@ from chatbot.routes import chatbot_bp
 from mood import mood_bp
 from community import community_bp
 
-# Extra layer of CORS specifically for these blueprints before registration to avoid AssertionErrors
-CORS(mood_bp)
-CORS(community_bp)
+
 
 app.register_blueprint(auth_bp,      url_prefix="/api/auth")
 app.register_blueprint(alerts_bp,    url_prefix="/api/alerts")
