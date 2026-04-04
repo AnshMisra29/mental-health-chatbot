@@ -7,8 +7,26 @@ from database.models import CommunityPost
 @community_bp.route("/posts", methods=["GET"])
 @jwt_required()
 def get_posts():
-    posts = CommunityPost.query.order_by(CommunityPost.created_at.desc()).all()
-    return jsonify({"data": [p.to_dict() for p in posts]}), 200
+    try:
+        # Get pagination parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        
+        # Query community posts (most recent first)
+        query = CommunityPost.query.order_by(CommunityPost.created_at.desc())
+        
+        # Pagination
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        return jsonify({
+            "total": paginated.total,
+            "pages": paginated.pages,
+            "current_page": page,
+            "per_page": per_page,
+            "data": [p.to_dict() for p in paginated.items]
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @community_bp.route("/posts", methods=["POST"])
 @jwt_required()

@@ -100,6 +100,7 @@ def get_chatbot_response(user_id, message):
             print(f"DEBUG: DB Save Error (skipped): {db_err}")
 
         return {
+            "id": chat_record.id if 'chat_record' in locals() else None,
             "response": "I hear that you're going through a very difficult time. Please know that you're not alone and there is support available. If you're in immediate danger, please reach out to local emergency services or a crisis helpline like iCall India at 9152987821.",
             "emotion": detected_emotion,
             "is_crisis": True,
@@ -162,6 +163,7 @@ def get_chatbot_response(user_id, message):
             print(f"DEBUG: DB Save Error (skipped): {db_err}")
 
         return {
+            "id": chat_record.id,
             "response": reply,
             "emotion": detected_emotion,
             "is_crisis": False,

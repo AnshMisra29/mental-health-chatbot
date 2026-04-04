@@ -36,6 +36,12 @@ class User(db.Model):
         lazy=True,
         cascade="all, delete-orphan"
     )
+    journal_entries = db.relationship(
+        "JournalEntry",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
 
     # Password methods
     def set_password(self, password):
@@ -61,6 +67,7 @@ class ChatHistory(db.Model):
     emotion        = db.Column(db.String(50))
     risk_level     = db.Column(db.String(50))
     model_metadata = db.Column(db.JSON)  # Stores raw multi-class scores
+    is_hidden      = db.Column(db.Boolean, default=False)
     timestamp      = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -202,3 +209,29 @@ class MoodLog(db.Model):
 
     def __repr__(self):
         return f"<MoodLog {self.mood_label} by user {self.user_id}>"
+
+
+# ── JournalEntry ─────────────────────────────────────────────────────────────
+
+class JournalEntry(db.Model):
+    __tablename__ = 'journal_entries'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title      = db.Column(db.String(255), nullable=True)
+    content    = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "title": self.title,
+            "content": self.content,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None
+        }
+
+    def __repr__(self):
+        return f"<JournalEntry {self.id} by user {self.user_id}>"

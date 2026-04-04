@@ -20,7 +20,11 @@ import {
   Zap,
   BookOpen,
   X,
+  Loader2,
 } from "lucide-react";
+import { useWeather } from "../hooks/useWeather";
+import { useMoodLogs } from "../hooks/useMood";
+import { useChatHistory } from "../hooks/useChatHistory";
 
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
@@ -28,151 +32,55 @@ const MotionButton = motion.button;
 const DashboardPage = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const [weather, setWeather] = useState({
-    temp: null,
-    condition: "Loading...",
-    city: "Locating...",
-    icon: Sun,
-    color: "text-amber-500",
-  });
-  const [dashboardStats, setDashboardStats] = useState({
-    activeDays: 0,
-    moodLogs: 0,
-    chatSessions: 0,
-    currentMood: null,
-  });
+  const { data: weatherData, isLoading: weatherLoading } = useWeather();
+  const { data: moodData } = useMoodLogs(1, 100); // Get first 100 logs for stats
+  const { 
+    data: chatData, 
+    fetchNextPage: fetchNextChats, 
+    hasNextPage: hasNextChats, 
+    isFetchingNextPage: isFetchingMoreChats 
+  } = useChatHistory();
+
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showGratitudeModal, setShowGratitudeModal] = useState(false);
 
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        // 1. Get location based on IP (using geojs for better rate limits)
-        const locationRes = await fetch("https://get.geojs.io/v1/ip/geo.json");
-        const locationData = await locationRes.json();
-        const { city, latitude, longitude } = locationData;
+  // Derive stats from cached data
+  const logs = moodData?.data || [];
+  const allChats = chatData?.pages.flatMap(page => page.history) || [];
+  const totalChats = chatData?.pages[0]?.total || 0;
 
-        if (!latitude || !longitude) throw new Error("Location not found");
+  const activeDates = new Set([
+    ...logs.map(log => new Date(log.timestamp).toDateString()),
+    ...allChats.map(chat => new Date(chat.timestamp).toDateString())
+  ]);
 
-        // 2. Get weather using Open-Meteo (no API key required)
-        const weatherRes = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
-        );
-        const weatherData = await weatherRes.json();
-        const current = weatherData.current_weather;
+  const dashboardStats = {
+    activeDays: activeDates.size,
+    moodLogs: moodData?.total || 0,
+    chatSessions: totalChats,
+    currentMood: sessionStorage.getItem("moodLoggedThisSession") === "true" && logs.length > 0 
+      ? logs[0].mood_emoji 
+      : null,
+    recentActivities: [
+      ...logs.map(log => ({
+        title: "Mood Logged",
+        time: new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: "Mood Log",
+        emoji: log.mood_emoji || "😌",
+        timestamp: new Date(log.timestamp)
+      })),
+      ...allChats.slice(0, 10).map(chat => ({
+        title: "Chat with Sia",
+        time: new Date(chat.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: "Chat",
+        emoji: "💬",
+        timestamp: new Date(chat.timestamp)
+      }))
+    ].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5)
+  };
 
-        // 3. Map WMO weather code to condition and icon
-        // WMO Weather interpretation codes (https://open-meteo.com/en/docs)
-        let condition = "Clear";
-        let icon = Sun;
-        let color = "text-amber-500";
-
-        const code = current.weathercode;
-        if (code === 0) {
-          condition = "Clear";
-          icon = Sun;
-          color = "text-amber-500";
-        } else if (code >= 1 && code <= 3) {
-          condition = "Partly Cloudy";
-          icon = Cloud;
-          color = "text-slate-400";
-        } else if (code >= 45 && code <= 48) {
-          condition = "Foggy";
-          icon = Cloud;
-          color = "text-slate-400";
-        } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
-          condition = "Rain";
-          icon = CloudRain;
-          color = "text-blue-400";
-        } else if ((code >= 71 && code <= 77) || code === 85 || code === 86) {
-          condition = "Snow";
-          icon = CloudSnow;
-          color = "text-sky-200";
-        } else if (code >= 95 && code <= 99) {
-          condition = "Thunderstorm";
-          icon = CloudLightning;
-          color = "text-purple-500";
-        }
-
-        setWeather({
-          temp: Math.round(current.temperature),
-          condition,
-          city: city || "Unknown Location",
-          icon,
-          color,
-        });
-      } catch (error) {
-        console.error("Error fetching weather:", error);
-        setWeather({
-          temp: "--",
-          condition: "Unavailable",
-          city: "Unknown",
-          icon: Cloud,
-          color: "text-slate-400",
-        });
-      }
-    };
-
-    const fetchDashboardData = async () => {
-      try {
-        // Add current timestamp as cache-buster to ensure we get fresh data
-        const now = Date.now();
-        const [moodRes, chatRes] = await Promise.all([
-          api.get(`/mood/logs?t=${now}`),
-          api.get(`/chat/history?per_page=5000&t=${now}`)
-        ]);
-        
-        const logs = moodRes.data.data || [];
-        const chats = chatRes.data.history || [];
-
-        const moodLogsCount = logs.length;
-        const chatSessionsCount = chatRes.data.total || 0;
-
-        // Group by day to get combined active days
-        const activeDates = new Set([
-          ...logs.map(log => new Date(log.timestamp).toDateString()),
-          ...chats.map(chat => new Date(chat.timestamp).toDateString())
-        ]);
-        
-        const activeDaysCount = activeDates.size;
-        
-        let currentMood = null; 
-        if (logs.length > 0) {
-          // Sort by timestamp descending to get the absolute latest entry first
-          const sortedLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-          
-          // Check our reliable session flag to see if they logged a mood since logging in
-          if (sessionStorage.getItem("moodLoggedThisSession") === "true") {
-            currentMood = sortedLogs[0].mood_emoji;
-          }
-        }
-
-        setDashboardStats({
-          activeDays: activeDaysCount,
-          moodLogs: moodLogsCount,
-          chatSessions: chatSessionsCount,
-          currentMood: currentMood,
-          recentLogs: logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)),
-          recentChats: chats.slice(-5).reverse()
-        });
-      } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
-      }
-    };
-
-    fetchWeather();
-    fetchDashboardData();
-
-    // Listen for custom events to refresh dashboard stats
-    const handleDataRefresh = () => fetchDashboardData();
-    window.addEventListener("mood-updated", handleDataRefresh);
-    window.addEventListener("community-post-created", handleDataRefresh);
-
-    return () => {
-      window.removeEventListener("mood-updated", handleDataRefresh);
-      window.removeEventListener("community-post-created", handleDataRefresh);
-    };
-  }, []);
+  // No more manual useEffect fetching needed for core data!
+  // It's all handled in hooks/background now.
 
   const stats = [
     {
@@ -201,20 +109,7 @@ const DashboardPage = () => {
     },
   ];
 
-  const recentActivities = [
-    ...(dashboardStats.recentLogs || []).map(log => ({
-      title: "Mood Logged",
-      time: new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      type: "Mood Log",
-      emoji: log.mood_emoji || "😌",
-    })),
-    ...(dashboardStats.recentLogs && dashboardStats.recentLogs.length === 0 ? [{
-      title: "No entries yet",
-      time: "Today",
-      type: "System",
-      emoji: "📝"
-    }] : [])
-  ].slice(0, 5); // Keep it clean with top 5
+  const recentActivities = dashboardStats.recentActivities;
 
   return (
     <AuthenticatedLayout>
@@ -238,16 +133,22 @@ const DashboardPage = () => {
               </p>
             </div>
             <div className="flex items-center gap-4 px-8 py-4 rounded-[2rem] bg-card border border-border/60 shadow-soft">
-              <weather.icon className={`w-6 h-6 ${weather.color}`} />
-              <div className="flex flex-col">
-                <span className="text-base font-bold leading-tight">
-                  {weather.temp !== null ? `${weather.temp}°C` : "--"} ·{" "}
-                  {weather.condition}
-                </span>
-                <span className="text-[10px] text-foreground/40 font-black uppercase tracking-widest">
-                  {weather.city}
-                </span>
-              </div>
+              {weatherLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin text-cyan-600" />
+              ) : (
+                <>
+                  {weatherData?.icon && <weatherData.icon className={`w-6 h-6 ${weatherData?.color}`} />}
+                  <div className="flex flex-col">
+                    <span className="text-base font-bold leading-tight">
+                      {weatherData?.temp !== undefined ? `${weatherData.temp}°C` : "--"} ·{" "}
+                      {weatherData?.condition || "Unknown"}
+                    </span>
+                    <span className="text-[10px] text-foreground/40 font-black uppercase tracking-widest">
+                      {weatherData?.city || "Locating..."}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </MotionDiv>
         </div>
@@ -521,26 +422,42 @@ const DashboardPage = () => {
               </button>
             </div>
             
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
-              {dashboardStats.recentLogs && dashboardStats.recentLogs.length > 0 ? (
-                dashboardStats.recentLogs.map((log, i) => (
-                  <div key={log.id || i} className="flex items-center gap-4 p-5 rounded-[2rem] bg-background/50 border border-border/40">
-                    <div className="w-12 h-12 min-w-[3rem] rounded-2xl bg-foreground/5 flex items-center justify-center text-2xl shadow-inner">
-                      {log.mood_emoji || "😌"}
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar"
+                 onScroll={(e) => {
+                   const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+                   if (scrollHeight - scrollTop <= clientHeight + 100 && hasNextChats && !isFetchingMoreChats) {
+                     fetchNextChats();
+                   }
+                 }}>
+              {allChats.length > 0 ? (
+                <>
+                  {allChats.map((chat, i) => (
+                    <div key={chat.id || i} className="flex items-center gap-4 p-5 rounded-[2rem] bg-background/50 border border-border/40">
+                      <div className="w-12 h-12 min-w-[3rem] rounded-2xl bg-foreground/5 flex items-center justify-center text-2xl shadow-inner text-white">
+                        {chat.id % 2 === 0 ? "💬" : "🗨️"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-base font-black text-foreground truncate font-heading tracking-tight">
+                          Chat: {chat.message}
+                        </h4>
+                        <p className="text-[10px] text-foreground/40 uppercase font-black tracking-widest mt-1">
+                          {new Date(chat.timestamp).toLocaleDateString()} · {new Date(chat.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-base font-black text-foreground truncate font-heading tracking-tight">
-                        Mood Logged: {log.mood_label}
-                      </h4>
-                      <p className="text-[10px] text-foreground/40 uppercase font-black tracking-widest mt-1">
-                        {new Date(log.timestamp).toLocaleDateString()} · {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                  ))}
+                  {isFetchingMoreChats && (
+                    <div className="flex justify-center p-4">
+                      <Loader2 className="w-6 h-6 animate-spin text-cyan-600" />
                     </div>
-                  </div>
-                ))
+                  )}
+                  {!hasNextChats && allChats.length > 0 && (
+                    <p className="text-center text-[10px] text-foreground/20 font-black uppercase tracking-widest py-4">End of History</p>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-foreground/50 font-medium">No mood history available.</p>
+                  <p className="text-foreground/50 font-medium">No chat history available.</p>
                 </div>
               )}
             </div>

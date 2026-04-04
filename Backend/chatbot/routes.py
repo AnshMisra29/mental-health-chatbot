@@ -52,11 +52,14 @@ def get_history():
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 50, type=int)
         
-        # Query chat history (most recent first)
-        query = ChatHistory.query.filter_by(user_id=user_id).order_by(ChatHistory.timestamp.desc())
+        # Query chat history (most recent first, excluding hidden ones)
+        query = ChatHistory.query.filter_by(user_id=user_id, is_hidden=False).order_by(ChatHistory.timestamp.desc())
         
         # Pagination
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        # Calculate true total (including hidden ones) for Dashboard consistency
+        total_all = ChatHistory.query.filter_by(user_id=user_id).count()
         
         # Format response
         history = []
@@ -73,12 +76,60 @@ def get_history():
             })
         
         return jsonify({
-            "total": paginated.total,
+            "total": total_all,
             "pages": paginated.pages,
             "current_page": page,
             "per_page": per_page,
             "history": history
         }), 200
         
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@chatbot_bp.route('/history/<int:chat_id>', methods=['DELETE'])
+@jwt_required()
+def delete_chat(chat_id):
+    """
+    Soft-deletes a chat message by setting is_hidden to True.
+    """
+    try:
+        user_id = int(get_jwt_identity())
+        chat = ChatHistory.query.get_or_404(chat_id)
+        
+        if chat.user_id != user_id:
+            return jsonify({"error": "Unauthorized"}), 403
+            
+        chat.is_hidden = True
+        from database.db import db
+        db.session.commit()
+        
+        return jsonify({"message": "Message hidden successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@chatbot_bp.route('/history/delete-bulk', methods=['POST'])
+@jwt_required()
+def delete_bulk_chats():
+    """
+    Soft-deletes multiple chat messages by setting is_hidden to True.
+    """
+    try:
+        user_id = int(get_jwt_identity())
+        data = request.get_json()
+        chat_ids = data.get('chat_ids', [])
+        
+        if not chat_ids:
+            return jsonify({"error": "No chat IDs provided"}), 400
+            
+        # Bulk update is_hidden for matching chats
+        from database.db import db
+        ChatHistory.query.filter(
+            ChatHistory.id.in_(chat_ids),
+            ChatHistory.user_id == user_id
+        ).update({ChatHistory.is_hidden: True}, synchronize_session=False)
+        
+        db.session.commit()
+        
+        return jsonify({"message": f"{len(chat_ids)} messages hidden successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -7,9 +7,28 @@ from database.models import MoodLog
 @mood_bp.route("/logs", methods=["GET"])
 @jwt_required()
 def get_mood_logs():
-    user_id = int(get_jwt_identity())
-    logs = MoodLog.query.filter_by(user_id=user_id).order_by(MoodLog.timestamp.asc()).all()
-    return jsonify({"data": [l.to_dict() for l in logs]}), 200
+    try:
+        user_id = int(get_jwt_identity())
+        
+        # Get pagination parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 50, type=int)
+        
+        # Query mood logs (most recent first)
+        query = MoodLog.query.filter_by(user_id=user_id).order_by(MoodLog.timestamp.desc())
+        
+        # Pagination
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        return jsonify({
+            "total": paginated.total,
+            "pages": paginated.pages,
+            "current_page": page,
+            "per_page": per_page,
+            "data": [l.to_dict() for l in paginated.items]
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @mood_bp.route("/logs", methods=["POST"])
 @jwt_required()
