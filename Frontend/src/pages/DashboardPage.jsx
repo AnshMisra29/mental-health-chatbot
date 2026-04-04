@@ -42,6 +42,7 @@ const DashboardPage = () => {
     currentMood: null,
   });
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showGratitudeModal, setShowGratitudeModal] = useState(false);
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -313,9 +314,9 @@ const DashboardPage = () => {
                 You
               </h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Link
-                  to="/mood-log"
-                  className="p-10 rounded-[2.5rem] bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 transition-all group relative overflow-hidden shadow-xl"
+                <button
+                  onClick={() => setShowGratitudeModal(true)}
+                  className="p-10 rounded-[2.5rem] bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 transition-all group relative overflow-hidden shadow-xl text-left"
                 >
                   <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[4rem] rounded-full translate-x-1/3 -translate-y-1/3 group-hover:bg-white/15 transition-all duration-700" />
                   <Heart className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform" />
@@ -331,7 +332,7 @@ const DashboardPage = () => {
                       →
                     </span>
                   </span>
-                </Link>
+                </button>
                 <Link
                   to="/chat"
                   className="p-10 rounded-[2.5rem] bg-card border border-border/60 hover:border-cyan-400/30 transition-all group shadow-soft hover:shadow-xl relative overflow-hidden"
@@ -413,6 +414,84 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+
+      {/* MENTAL HEALTH AWARENESS / GRATITUDE MODAL */}
+      {showGratitudeModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowGratitudeModal(false)}
+            className="absolute inset-0 bg-background/80 backdrop-blur-md"
+          />
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            className="relative w-full max-w-4xl bg-card border border-border/60 rounded-[2.5rem] shadow-2xl overflow-hidden"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-cyan-600 to-sky-600 px-10 py-8 relative overflow-hidden flex items-center justify-between">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[60px] rounded-full translate-x-1/3 -translate-y-1/3" />
+              <div className="relative z-10">
+                <span className="px-4 py-1.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 inline-block mb-3">
+                  Mental Health Awareness
+                </span>
+                <h2 className="text-3xl font-black text-white font-heading tracking-tight leading-tight">
+                  The Power of Gratitude 🌱
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowGratitudeModal(false)}
+                className="relative z-10 text-white/40 hover:text-white transition-colors ml-6 flex-shrink-0"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-8">
+              {/* Horizontally scrollable fact cards */}
+              <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide">
+                {[
+                  { emoji: "🧠", title: "Rewires your brain", desc: "Practicing gratitude daily activates the brain's reward pathways and increases dopamine and serotonin levels — natural mood boosters." },
+                  { emoji: "💤", title: "Improves sleep quality", desc: "People who write down what they're grateful for before bed fall asleep faster and wake up feeling more refreshed." },
+                  { emoji: "❤️", title: "Reduces anxiety & stress", desc: "Gratitude shifts focus from worries to positives, lowering cortisol levels and building emotional resilience over time." },
+                  { emoji: "🤝", title: "Strengthens relationships", desc: "Expressing gratitude to others deepens social bonds and fosters a sense of belonging — a key pillar of mental wellness." },
+                  { emoji: "✨", title: "Boosts self-esteem", desc: "Regularly acknowledging what's good in your life builds confidence and reduces the tendency to compare yourself with others." },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="flex-shrink-0 w-56 p-6 rounded-[1.5rem] bg-background/60 border border-border/40 hover:border-cyan-500/30 transition-colors flex flex-col gap-4"
+                  >
+                    <span className="text-3xl">{item.emoji}</span>
+                    <h4 className="text-sm font-black font-heading tracking-tight text-foreground leading-snug">{item.title}</h4>
+                    <p className="text-foreground/50 text-xs font-medium leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tip + CTA row */}
+              <div className="mt-6 flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex-1 p-5 rounded-[1.5rem] bg-cyan-500/10 border border-cyan-500/20">
+                  <p className="text-cyan-600 dark:text-cyan-400 text-sm font-black">
+                    💡 Try this: Write down 3 things you're grateful for right now.
+                  </p>
+                </div>
+                <Link
+                  to="/journal"
+                  onClick={() => setShowGratitudeModal(false)}
+                  className="flex-shrink-0 px-8 py-4 rounded-[1.5rem] bg-gradient-to-r from-cyan-600 to-sky-600 text-white font-black uppercase tracking-widest text-xs shadow-xl hover:shadow-cyan-500/20 transition-all flex items-center gap-3 whitespace-nowrap"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Write in Journal
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* FULL HISTORY MODAL */}
       {showHistoryModal && (

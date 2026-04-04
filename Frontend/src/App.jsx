@@ -17,6 +17,7 @@ import ChatPage from "./pages/ChatPage";
 import HelpPage from "./pages/HelpPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import ProfilePage from "./pages/ProfilePage";
+import JournalPage from "./pages/JournalPage";
 
 // Component Imports
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -33,7 +34,7 @@ function App() {
           <Route
             path="/auth"
             element={
-              !isAuthenticated ? <AuthPage /> : <Navigate to="/dashboard" />
+              !isAuthenticated ? <AuthPage /> : <Navigate to="/dashboard" replace />
             }
           />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
@@ -75,7 +76,7 @@ function App() {
             path="/journal"
             element={
               <ProtectedRoute>
-                <MoodTrackerPage />
+                <JournalPage />
               </ProtectedRoute>
             }
           />
@@ -94,7 +95,7 @@ function App() {
           {/* Fallback Catch-all */}
           <Route
             path="*"
-            element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} />}
+            element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} replace />}
           />
         </Routes>
       </div>
