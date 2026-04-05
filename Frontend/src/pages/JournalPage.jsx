@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Check, Clock, Edit2, Trash2, Calendar, Sparkles } from "lucide-react";
+import { Plus, Check, Clock, Edit2, Trash2, Calendar, Sparkles, Loader2 } from "lucide-react";
 import api from "../services/api";
+import { useJournalEntries, useSaveJournalEntry, useDeleteJournalEntry } from "../hooks/useJournal";
 
 const MotionDiv = motion.div;
 
 const JournalPage = () => {
-  const [entries, setEntries] = useState([]);
+  // ── Journal Data (React Query) ─────────────────────────
+  const { data: entries = [], isLoading: loading } = useJournalEntries();
+  const saveMutation = useSaveJournalEntry();
+  const deleteMutation = useDeleteJournalEntry();
+
   const [activeEntry, setActiveEntry] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
   // Form State
@@ -17,25 +21,14 @@ const JournalPage = () => {
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null); // id of entry to delete
 
-  const fetchEntries = async () => {
-    try {
-      const { data } = await api.get("/journal/entries");
-      setEntries(data || []);
-      // Auto select the first entry if none selected and not editing
-      if (!activeEntry && !isEditing && data.length > 0) {
-        handleSelectEntry(data[0]);
-      }
-    } catch (error) {
-      console.error("Error fetching journal entries:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Auto select the first entry if none selected and not editing
   useEffect(() => {
-    fetchEntries();
-  }, []);
+    if (!activeEntry && !isEditing && entries.length > 0) {
+      handleSelectEntry(entries[0]);
+    }
+  }, [entries, activeEntry, isEditing]);
 
   const handleSelectEntry = (entry) => {
     setActiveEntry(entry);
@@ -55,18 +48,15 @@ const JournalPage = () => {
     if (!content.trim()) return;
     setSaving(true);
     try {
-      if (activeEntry) {
-        // Update existing
-        const { data } = await api.put(`/journal/entries/${activeEntry.id}`, { title, content });
-        setActiveEntry(data.entry);
-      } else {
-        // Create new
-        const { data } = await api.post("/journal/entries", { title, content });
-        setActiveEntry(data.entry);
-      }
+      const result = await saveMutation.mutateAsync({
+        id: activeEntry?.id,
+        title,
+        content
+      });
+      setActiveEntry(result.entry);
       setSaveSuccess(true);
       setIsEditing(false);
-      fetchEntries();
+      startNewEntry(); // Clear after save
       setTimeout(() => setSaveSuccess(false), 2000);
     } catch (error) {
       console.error("Error saving entry:", error);
@@ -77,11 +67,11 @@ const JournalPage = () => {
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/journal/entries/${id}`);
+      await deleteMutation.mutateAsync(id);
       if (activeEntry?.id === id) {
         startNewEntry();
       }
-      fetchEntries();
+      setShowDeleteConfirm(null);
     } catch (error) {
       console.error("Error deleting entry:", error);
     }
@@ -115,8 +105,11 @@ const JournalPage = () => {
           </MotionDiv>
           
           <div className="flex-1 flex flex-col gap-3">
-            {loading ? (
-              <p className="text-foreground/40 text-sm font-medium italic p-4">Loading entries...</p>
+            {loading && entries.length === 0 ? (
+              <div className="p-4 flex items-center gap-3 text-cyan-600">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <p className="text-sm font-medium italic">Syncing memories...</p>
+              </div>
             ) : entries.length === 0 ? (
               <div className="p-8 rounded-[2rem] bg-card/60 backdrop-blur-xl border border-border/60 text-center">
                 <Sparkles className="w-8 h-8 text-cyan-600 mx-auto mb-3 opacity-50" />
@@ -136,12 +129,6 @@ const JournalPage = () => {
                     <h3 className={`font-bold font-heading truncate flex-1 pr-2 ${activeEntry?.id === entry.id ? 'text-cyan-600' : 'text-foreground'}`}>
                       {entry.title || "Untitled Entry"}
                     </h3>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleDelete(entry.id); }}
-                      className="text-foreground/20 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
                   <p className="text-xs text-foreground/40 line-clamp-2">
                     {entry.content}
@@ -188,13 +175,22 @@ const JournalPage = () => {
             
             <div className="flex items-center gap-3 ml-4">
               {(!isEditing && activeEntry) ? (
-                <button 
-                  onClick={() => setIsEditing(true)}
-                  className="p-3 rounded-xl bg-background border border-border/60 text-foreground/60 hover:text-cyan-600 hover:border-cyan-500/30 transition-all flex items-center gap-2"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">Edit</span>
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setShowDeleteConfirm(activeEntry.id)}
+                    className="p-3 rounded-xl bg-background border border-border/60 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">Delete</span>
+                  </button>
+                  <button 
+                    onClick={() => setIsEditing(true)}
+                    className="p-3 rounded-xl bg-background border border-border/60 text-foreground/60 hover:text-cyan-600 hover:border-cyan-500/30 transition-all flex items-center gap-2"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">Edit</span>
+                  </button>
+                </div>
               ) : (
                 <button 
                   onClick={handleSave}
@@ -242,6 +238,49 @@ const JournalPage = () => {
           </div>
         </MotionDiv>
       </div>
+
+      {/* Custom Delete Confirmation UI */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <MotionDiv 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeleteConfirm(null)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            />
+            <MotionDiv 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-sm bg-card border border-border/60 rounded-[2rem] shadow-2xl p-8 flex flex-col items-center text-center gap-6"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500">
+                <Trash2 className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black font-heading mb-2">Delete Journal Entry?</h3>
+                <p className="text-foreground/50 text-sm font-medium">This action cannot be undone. Your memories for this day will be permanently removed.</p>
+              </div>
+              <div className="flex w-full gap-3">
+                <button 
+                  onClick={() => setShowDeleteConfirm(null)}
+                  className="flex-1 py-4 rounded-xl bg-background border border-border/60 text-foreground/60 font-black uppercase tracking-widest text-[10px] hover:bg-card transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleDelete(showDeleteConfirm)}
+                  className="flex-1 py-4 rounded-xl bg-rose-500 text-white font-black uppercase tracking-widest text-[10px] hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20"
+                >
+                  Delete Forever
+                </button>
+              </div>
+            </MotionDiv>
+          </div>
+        )}
+      </AnimatePresence>
     </AuthenticatedLayout>
   );
 };

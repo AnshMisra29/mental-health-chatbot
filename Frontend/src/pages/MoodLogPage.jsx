@@ -13,8 +13,11 @@ import {
   Send,
   AlertTriangle,
   User,
+  Loader2,
 } from "lucide-react";
 import api from "../services/api";
+import { useCommunityPosts, useCreatePost, useDeletePost } from "../hooks/useCommunity";
+import { useCreateMoodLog } from "../hooks/useMood";
 
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
@@ -38,25 +41,21 @@ const MoodLogPage = () => {
   const [activeTab, setActiveTab] = useState("All");
 
   // ── Posts ─────────────────────────────────────────────────────
-  const [posts, setPosts]     = useState([]);
-  const [loading, setLoading] = useState(true);
+  // ── Community Posts (Infinite Query) ─────────────────────────
+  const {
+    data: postData,
+    fetchNextPage: fetchNextPosts,
+    hasNextPage: hasNextPosts,
+    isFetchingNextPage: isFetchingMorePosts,
+    isLoading: postsLoading
+  } = useCommunityPosts();
 
-  const fetchPosts = async () => {
-    try {
-      const { data } = await api.get("/community/posts");
-      setPosts(data.data || []);
-    } catch (err) {
-      console.error("Error fetching posts:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const posts = postData?.pages.flatMap(page => page.data) || [];
 
-  useEffect(() => {
-    fetchPosts();
-    window.addEventListener("community-post-created", fetchPosts);
-    return () => window.removeEventListener("community-post-created", fetchPosts);
-  }, []);
+  // Mutations
+  const createPostMutation = useCreatePost();
+  const deletePostMutation = useDeletePost();
+  const createMoodMutation = useCreateMoodLog();
 
   // ── Share Post Modal ──────────────────────────────────────────
   const [showShareModal, setShowShareModal]   = useState(false);
@@ -80,16 +79,13 @@ const MoodLogPage = () => {
       setSubmitError("Please fill in both the title and content.");
       return;
     }
-    setSubmitting(true);
-    setSubmitError("");
     try {
-      await api.post("/community/posts", {
+      await createPostMutation.mutateAsync({
         title:    postTitle.trim(),
         content:  postContent.trim(),
         category: postCategory,
       });
       setShowShareModal(false);
-      await fetchPosts();
       window.dispatchEvent(new CustomEvent("community-post-created"));
     } catch (err) {
       setSubmitError(err.response?.data?.error || "Failed to share post. Please try again.");
@@ -106,8 +102,7 @@ const MoodLogPage = () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await api.delete(`/community/posts/${deleteTarget}`);
-      setPosts((prev) => prev.filter((p) => p.id !== deleteTarget));
+      await deletePostMutation.mutateAsync(deleteTarget);
       setDeleteTarget(null);
     } catch (err) {
       console.error("Error deleting post:", err);
@@ -137,7 +132,7 @@ const MoodLogPage = () => {
     if (loggingMood) return;
     setLoggingMood(true);
     try {
-      await api.post("/mood/logs", { mood_label: mood.label, mood_emoji: mood.emoji });
+      await createMoodMutation.mutateAsync({ mood_label: mood.label, mood_emoji: mood.emoji });
       setLastLoggedId(mood.label);
       sessionStorage.setItem("moodLoggedThisSession", "true");
       window.dispatchEvent(new CustomEvent("mood-updated", { detail: { emoji: mood.emoji } }));
@@ -169,7 +164,13 @@ const MoodLogPage = () => {
 
   return (
     <AuthenticatedLayout>
-      <div className="flex-1 overflow-y-auto p-8 max-w-6xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto p-8 max-w-6xl mx-auto w-full"
+           onScroll={(e) => {
+             const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+             if (scrollHeight - scrollTop <= clientHeight + 100 && hasNextPosts && !isFetchingMorePosts) {
+               fetchNextPosts();
+             }
+           }}>
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16">
@@ -251,9 +252,10 @@ const MoodLogPage = () => {
         </div>
 
         {/* Posts Grid */}
-        {loading ? (
-          <div className="text-center py-20 text-foreground/30 font-black uppercase tracking-widest text-xs">
-            Loading posts…
+        {postsLoading && posts.length === 0 ? (
+          <div className="text-center py-20 flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-cyan-600" />
+            <p className="text-foreground/30 font-black uppercase tracking-widest text-xs">Loading posts…</p>
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="text-center py-20">
@@ -261,67 +263,77 @@ const MoodLogPage = () => {
             <p className="text-foreground/20 text-sm">Be the first to share something!</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-8">
-            {filteredPosts.map((post, i) => {
-              const isOwner = currentUser && post.user_id === currentUser.id;
-              const catColor = CATEGORY_COLORS[post.category] || "bg-foreground/5 text-foreground/40 border-border/40";
-              return (
-                <MotionDiv
-                  layout
-                  key={post.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.06 }}
-                  whileHover={{ y: -8 }}
-                  onClick={() => setReadPost(post)}
-                  className="p-10 rounded-[3rem] bg-card border border-border/60 shadow-soft hover:shadow-xl hover:border-cyan-400/20 transition-all group cursor-pointer"
-                >
-                  {/* Top row: category badge + delete */}
-                  <div className="flex items-center justify-between mb-6">
-                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border ${catColor}`}>
-                      {post.category}
-                    </span>
-                    {isOwner && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(post.id); }}
-                        className="text-rose-500 hover:text-rose-400 transition-colors bg-rose-500/10 hover:bg-rose-500/20 p-2 rounded-xl"
-                        title="Delete post"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-2xl font-black mb-3 font-heading tracking-tight leading-tight group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
-                    {post.title}
-                  </h3>
-
-                  {/* Content preview */}
-                  <p className="text-foreground/50 text-sm font-medium leading-relaxed line-clamp-3 mb-8">
-                    {post.content}
-                  </p>
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-between pt-8 border-t border-border/60">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 group-hover:gap-4 transition-all">
-                      Read Post <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <>
+            <div className="grid md:grid-cols-2 gap-8">
+              {filteredPosts.map((post, i) => {
+                const isOwner = currentUser && post.user_id === currentUser.id;
+                const catColor = CATEGORY_COLORS[post.category] || "bg-foreground/5 text-foreground/40 border-border/40";
+                return (
+                  <MotionDiv
+                    layout
+                    key={post.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i % 10 * 0.06 }}
+                    whileHover={{ y: -8 }}
+                    onClick={() => setReadPost(post)}
+                    className="p-10 rounded-[3rem] bg-card border border-border/60 shadow-soft hover:shadow-xl hover:border-cyan-400/20 transition-all group cursor-pointer"
+                  >
+                    {/* Top row: category badge + delete */}
+                    <div className="flex items-center justify-between mb-6">
+                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border ${catColor}`}>
+                        {post.category}
+                      </span>
+                      {isOwner && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setDeleteTarget(post.id); }}
+                          className="text-rose-500 hover:text-rose-400 transition-colors bg-rose-500/10 hover:bg-rose-500/20 p-2 rounded-xl"
+                          title="Delete post"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-foreground/30">
-                        <User className="w-3 h-3" />
-                        {post.user?.name || "Anonymous"}
+
+                    {/* Title */}
+                    <h3 className="text-2xl font-black mb-3 font-heading tracking-tight leading-tight group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors text-foreground">
+                      {post.title}
+                    </h3>
+
+                    {/* Content preview */}
+                    <p className="text-foreground/50 text-sm font-medium leading-relaxed line-clamp-3 mb-8">
+                      {post.content}
+                    </p>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-8 border-t border-border/60">
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 group-hover:gap-4 transition-all">
+                        Read Post <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-foreground/25">
-                        <Clock className="w-3 h-3" />
-                        {formatDate(post.created_at)}
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-foreground/30">
+                          <User className="w-3 h-3" />
+                          {post.user?.name || "Anonymous"}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-foreground/25">
+                          <Clock className="w-3 h-3" />
+                          {formatDate(post.created_at)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </MotionDiv>
-              );
-            })}
-          </div>
+                  </MotionDiv>
+                );
+              })}
+            </div>
+            {isFetchingMorePosts && (
+              <div className="flex justify-center p-12">
+                <Loader2 className="w-8 h-8 animate-spin text-cyan-600" />
+              </div>
+            )}
+            {!hasNextPosts && posts.length > 0 && (
+              <p className="text-center text-[10px] text-foreground/20 font-black uppercase tracking-widest py-12">All posts captured ✨</p>
+            )}
+          </>
         )}
       </div>
 

@@ -8,7 +8,7 @@ from flask_jwt_extended import JWTManager
 from config import Config
 from database.db import db
 from database.db import db
-from database.models import User, CommunityPost, MoodLog  # Explicitly import models for db.create_all()
+from database.models import User, CommunityPost, MoodLog, JournalEntry  # Explicitly import models for db.create_all()
 from notifications import mail
 
 
@@ -47,6 +47,7 @@ from doctors import doctors_bp
 from chatbot.routes import chatbot_bp
 from mood import mood_bp
 from community import community_bp
+from journal import journal_bp
 
 
 
@@ -57,6 +58,7 @@ app.register_blueprint(doctors_bp,   url_prefix="/api/doctors")
 app.register_blueprint(chatbot_bp,   url_prefix="/api/chat")
 app.register_blueprint(mood_bp,      url_prefix="/api/mood",      strict_slashes=False)
 app.register_blueprint(community_bp, url_prefix="/api/community", strict_slashes=False)
+app.register_blueprint(journal_bp,   url_prefix="/api/journal",   strict_slashes=False)
 
 
 # ── Load ML Model ─────────────────────────────────────────────────────────────

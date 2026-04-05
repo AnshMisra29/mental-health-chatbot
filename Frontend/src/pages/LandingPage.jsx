@@ -7,13 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
   Sparkles,
-  Shield,
-  Zap,
   ArrowRight,
   Brain,
   MessageCircle,
   Users,
-  LineChart,
+  BookOpen,
+  Activity,
 } from "lucide-react";
 
 const MotionDiv = motion.div;
@@ -62,7 +61,7 @@ const LandingPage = () => {
 
       <main>
         {/* Hero Section */}
-        <section className="relative pt-64 pb-48 overflow-hidden min-h-[90vh] flex items-center">
+        <section className="relative pt-64 pb-24 overflow-hidden min-h-[80vh] flex items-center">
           {/* Advanced Decorative Elements */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[140%] h-[1000px] bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent blur-[120px] rounded-full pointer-events-none" />
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
@@ -88,9 +87,9 @@ const LandingPage = () => {
                 variants={itemVariants}
                 className="text-8xl md:text-[9rem] lg:text-[11rem] font-black font-heading tracking-[-0.05em] leading-[0.85] mb-12 text-foreground"
               >
-                Heal <br />
+                Find <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-emerald-600 to-cyan-600 bg-[length:200%_auto] animate-gradient-x">
-                  Different.
+                  Peace.
                 </span>
               </motion.h1>
 
@@ -121,49 +120,17 @@ const LandingPage = () => {
                   onClick={handleExploreTools}
                   className="px-12 py-6 rounded-[2rem] bg-card border border-border/60 text-foreground/80 font-black uppercase tracking-[0.2em] text-xs shadow-soft hover:shadow-lg flex items-center justify-center gap-4 transition-all"
                 >
-                  Explore CBT Tools
+                  Explore Features
                 </MotionButton>
               </motion.div>
             </MotionDiv>
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-32 relative border-y border-border/60">
-          <div className="absolute inset-0 bg-card/10 backdrop-blur-3xl" />
-          <div className="max-w-7xl mx-auto px-8 relative z-10">
-            <MotionDiv
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-16"
-            >
-              {[
-                { label: "Active Users", value: "85K+" },
-                { label: "AI Chats", value: "2.4M+" },
-                { label: "Self-Tests", value: "350K+" },
-                { label: "Privacy Rate", value: "100%" },
-              ].map((stat) => (
-                <MotionDiv
-                  variants={itemVariants}
-                  key={stat.label}
-                  className="group"
-                >
-                  <div className="text-5xl md:text-6xl font-black font-heading tracking-tighter text-cyan-600 mb-3 group-hover:scale-110 transition-transform duration-500">
-                    {stat.value}
-                  </div>
-                  <div className="text-[10px] text-foreground/30 font-black uppercase tracking-[0.3em] group-hover:text-foreground/50 transition-colors">
-                    {stat.label}
-                  </div>
-                </MotionDiv>
-              ))}
-            </MotionDiv>
-          </div>
-        </section>
+
 
         {/* Features Section */}
-        <section id="features" className="py-64 relative overflow-hidden">
+        <section id="features" className="py-32 relative overflow-hidden">
           <div className="absolute -bottom-96 -left-96 w-[800px] h-[800px] bg-cyan-500/5 blur-[160px] rounded-full pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-8 relative z-10">
@@ -187,16 +154,16 @@ const LandingPage = () => {
                   color: "from-cyan-600 to-cyan-400",
                 },
                 {
-                  title: "Clinical Tools",
-                  desc: "Interactive CBT journals, mood trackers, and anxiety assessments developed by therapists.",
-                  icon: LineChart,
-                  color: "from-emerald-600 to-emerald-400",
-                },
-                {
                   title: "Mood Log & Insights",
                   desc: "Log your daily emotions and explore evidence-based stories and tips to aid your wellness journey.",
-                  icon: Users,
+                  icon: Activity,
                   color: "from-blue-600 to-blue-400",
+                },
+                {
+                  title: "Posts & Journal",
+                  desc: "A private space for your gratitude journal and a community feed to share and read supportive stories.",
+                  icon: BookOpen,
+                  color: "from-emerald-600 to-emerald-400",
                 },
               ].map((feature, idx) => (
                 <MotionDiv
@@ -225,19 +192,15 @@ const LandingPage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="pb-64 pt-32">
+        <section className="pb-16 pt-32">
           <div className="max-w-7xl mx-auto px-8">
-            <div className="relative p-20 md:p-32 rounded-[4.5rem] bg-foreground text-background overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] group">
+            <div className="relative p-12 md:p-20 rounded-[3rem] bg-foreground text-background overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] group">
               <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-cyan-600/20 to-emerald-600/20 pointer-events-none" />
               <div className="relative z-10 text-center max-w-3xl mx-auto">
                 <h2 className="text-6xl md:text-8xl font-black font-heading tracking-tighter mb-12 leading-[0.85]">
                   The future <br /> of healing is{" "}
                   <span className="text-cyan-400">here.</span>
                 </h2>
-                <p className="text-background/50 text-2xl font-medium mb-16 max-w-lg mx-auto leading-relaxed">
-                  Join 85,000+ users who have already started their journey to a
-                  better mind.
-                </p>
                 <MotionButton
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
