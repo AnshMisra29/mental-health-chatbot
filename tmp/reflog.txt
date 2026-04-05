@@ -1,0 +1,70 @@
+﻿ad319cf HEAD@{0}: reset: moving to stable
+f24c150 HEAD@{1}: commit: feat: interactive footer and navbar modals, remove careers, and sync dashboard stats
+ad319cf HEAD@{2}: merge origin/stable: Fast-forward
+1009c3f HEAD@{3}: checkout: moving from stable to main
+ad319cf HEAD@{4}: reset: moving to HEAD
+ad319cf HEAD@{5}: commit: post and gratitude changes
+1009c3f HEAD@{6}: checkout: moving from main to stable
+1009c3f HEAD@{7}: checkout: moving from stable to main
+1009c3f HEAD@{8}: checkout: moving from main to stable
+1009c3f HEAD@{9}: reset: moving to 1009c3f
+7ad7e70 HEAD@{10}: checkout: moving from main to main
+7ad7e70 HEAD@{11}: checkout: moving from main to main
+7ad7e70 HEAD@{12}: checkout: moving from main to main
+7ad7e70 HEAD@{13}: commit: feat: added journal feature, updated dashboard UI, and included db
+e9aa2db HEAD@{14}: checkout: moving from stable to main
+1009c3f HEAD@{15}: commit: chore: save stable checkpoint with fixed CORS and missing DB columns
+e9aa2db HEAD@{16}: checkout: moving from main to stable
+e9aa2db HEAD@{17}: reset: moving to e9aa2db
+e9aa2db HEAD@{18}: commit: Fixed Frontend Alot
+6bd878c HEAD@{19}: commit: feat: complete Mood Log rebranding and add Sia response modal
+519347f HEAD@{20}: commit: Fix dashboard metrics, restore missing database models
+c3059a0 HEAD@{21}: commit: Update codebase with latest features and fixes
+41e5925 HEAD@{22}: commit: chore: update database, scripts, and add utility scripts for doctor management and alembic checks
+05646f1 HEAD@{23}: reset: moving to HEAD
+05646f1 HEAD@{24}: commit: revert: remove handle_fallback function as requested by user
+ee90f6c HEAD@{25}: commit: fix: handle missing GROQ_API_KEY gracefully with fallback responses
+9f25bd6 HEAD@{26}: commit: docs: add database overwrite warning to setup guide
+48af4bd HEAD@{27}: commit: docs: add team setup guide and env template
+97314c9 HEAD@{28}: commit: chore: include pre-populated database and population utility for team
+8e5e782 HEAD@{29}: commit: feat: implement forgot password, account lockout, OTP rate limiting, and updated doctor maps
+9344e4e HEAD@{30}: commit: feat: implement OTP registration and enhanced doctor mapping
+f496e67 HEAD@{31}: commit (merge): merge: incorporate remote changes
+5b5d6af HEAD@{32}: commit: fix: make MAIL_PORT parsing robust in config.py
+50efa5c HEAD@{33}: commit: feat: implement UI-centric doctor notification system with nearby search and email alerts
+051c423 HEAD@{34}: commit (merge): resolve: keep local DB after merge conflict
+f872a61 HEAD@{35}: commit: Db updated
+17e9424 HEAD@{36}: commit: feat: update ML model to 7-label classifier (adds Stress, Bipolar, Personality Disorder)
+8aa25f6 HEAD@{37}: commit: chore: push shared DB, remove temp test scripts, clean up unused API keys from config
+0a72a15 HEAD@{38}: commit: Fix ML inference, app routes, frontend components and update gitignore
+24cd319 HEAD@{39}: pull --rebase origin main (finish): returning to refs/heads/main
+f24c150 feat: interactive footer and navbar modals, remove careers, and sync dashboard stats
+ad319cf post and gratitude changes
+1009c3f chore: save stable checkpoint with fixed CORS and missing DB columns
+e9aa2db Fixed Frontend Alot
+6bd878c feat: complete Mood Log rebranding and add Sia response modal
+519347f Fix dashboard metrics, restore missing database models
+c3059a0 Update codebase with latest features and fixes
+41e5925 chore: update database, scripts, and add utility scripts for doctor management and alembic checks
+05646f1 revert: remove handle_fallback function as requested by user
+ee90f6c fix: handle missing GROQ_API_KEY gracefully with fallback responses
+9f25bd6 docs: add database overwrite warning to setup guide
+48af4bd docs: add team setup guide and env template
+97314c9 chore: include pre-populated database and population utility for team
+8e5e782 feat: implement forgot password, account lockout, OTP rate limiting, and updated doctor maps
+9344e4e feat: implement OTP registration and enhanced doctor mapping
+f496e67 merge: incorporate remote changes
+5b5d6af fix: make MAIL_PORT parsing robust in config.py
+0bb98fb Merge branch 'main' of https://github.com/AnshMisra29/mental-health-chatbot
+483891f new auth
+50efa5c feat: implement UI-centric doctor notification system with nearby search and email alerts
+051c423 resolve: keep local DB after merge conflict
+f872a61 Db updated
+9a070dd bug fix
+17e9424 feat: update ML model to 7-label classifier (adds Stress, Bipolar, Personality Disorder)
+8aa25f6 chore: push shared DB, remove temp test scripts, clean up unused API keys from config
+0a72a15 Fix ML inference, app routes, frontend components and update gitignore
+24cd319 fix: resolve user_id type mismatch, analytics bug, spinner CSS; add team setup guide and .env.example
+4b7461a Merge pull request #3 from AnshMisra29/frontend1
+6c4fdc1 ui redesign
+a874833 light mode

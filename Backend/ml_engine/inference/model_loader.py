@@ -33,11 +33,25 @@ class ModelLoader:
             self.initialized = True
 
     def load(self):
-        """Loads the model and tokenizer if not already loaded (blocking)."""
-        if not self.is_ready:
+        """Loads the model and tokenizer if not already loaded (blocking).
+        If a background thread is already loading, we wait for it instead of
+        trying to acquire the lock (which would deadlock).
+        """
+        if self.is_ready:
+            return self._model, self._tokenizer, self.device
+
+        # If background thread is running, just wait for it to finish
+        if self._loading_thread is not None and self._loading_thread.is_alive():
+            print("Waiting for background model load to complete...")
+            self._loading_thread.join(timeout=120)  # max 2 minutes wait
+            if not self.is_ready:
+                raise RuntimeError(f"Model failed to load: {self.error}")
+        else:
+            # No background thread — load synchronously
             with self._lock:
                 if not self.is_ready:
                     self._do_load()
+
         return self._model, self._tokenizer, self.device
 
     def load_background(self):
@@ -45,24 +59,22 @@ class ModelLoader:
         if self.is_ready:
             return
 
-        with self._lock:
-            if not self.is_ready and (self._loading_thread is None or not self._loading_thread.is_alive()):
-                print("Starting background model loading...")
-                self._loading_thread = threading.Thread(target=self._do_load)
-                self._loading_thread.daemon = True
-                self._loading_thread.start()
+        # No lock needed here — the thread itself uses no lock
+        if self._loading_thread is None or not self._loading_thread.is_alive():
+            print("Starting background model loading...")
+            self._loading_thread = threading.Thread(target=self._do_load)
+            self._loading_thread.daemon = True
+            self._loading_thread.start()
 
     def _do_load(self):
-        """Internal method to perform the actual loading. Should be called under lock or carefully."""
+        """Internal method to perform the actual loading. Thread-safe via instance check."""
         try:
-            # We don't strictly need a lock INSIDE here if called from load/load_background under lock
-            # but it doesn't hurt to be safe if this is called elsewhere.
             if self._model is not None:
                 return
 
             print(f"Loading model from: {self.model_path}")
-            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-            model = AutoModelForSequenceClassification.from_pretrained(self.model_path)
+            tokenizer = AutoTokenizer.from_pretrained(self.model_path, local_files_only=True)
+            model = AutoModelForSequenceClassification.from_pretrained(self.model_path, local_files_only=True)
             
             model.to(self.device)
             model.eval()

@@ -53,7 +53,7 @@ def get_history():
         per_page = request.args.get('per_page', 50, type=int)
         
         # Query chat history (most recent first, excluding hidden ones)
-        query = ChatHistory.query.filter_by(user_id=user_id, is_hidden=False).order_by(ChatHistory.timestamp.desc())
+        query = ChatHistory.query.filter_by(user_id=user_id).order_by(ChatHistory.timestamp.desc())
         
         # Pagination
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -61,18 +61,31 @@ def get_history():
         # Calculate true total (including hidden ones) for Dashboard consistency
         total_all = ChatHistory.query.filter_by(user_id=user_id).count()
         
+        # Pre-fetch recent alerts to link with crisis messages (avoid N+1 queries)
+        from database.models import AlertLog
+        recent_alerts = AlertLog.query.filter_by(user_id=user_id).order_by(AlertLog.triggered_at.desc()).limit(50).all()
+        
         # Format response
         history = []
         for chat in paginated.items:
+            # Find matching alert for crisis messages (within 30s of the chat)
+            alert_id = None
+            if chat.emotion == "Suicidal":
+                for alert in recent_alerts:
+                    delta = abs((alert.triggered_at - chat.timestamp).total_seconds())
+                    if delta < 30:
+                        alert_id = alert.id
+                        break
+
             history.append({
                 "id": chat.id,
                 "message": chat.message,
                 "bot_response": chat.bot_response,
                 "emotion": chat.emotion,
                 "risk_level": chat.risk_level,
+                "alert_id": alert_id,
                 "is_crisis": chat.emotion == "Suicidal",
-                "timestamp": chat.timestamp.isoformat(),
-                "model_metadata": chat.model_metadata
+                "timestamp": chat.timestamp.isoformat()
             })
         
         return jsonify({
@@ -85,6 +98,7 @@ def get_history():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @chatbot_bp.route('/history/<int:chat_id>', methods=['DELETE'])
 @jwt_required()

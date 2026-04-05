@@ -144,9 +144,9 @@ const chatSlice = createSlice({
         // Backend returns DESC (latest first). We want ASC (oldest first) in the UI.
         const historyData = [...action.payload.history].reverse();
         
-        const allMessages = [];
+        const historyMessages = [];
         historyData.forEach((chat) => {
-          allMessages.push({
+          historyMessages.push({
             id: `hist-${chat.id}-u`,
             text: chat.message,
             sender: "user",
@@ -155,7 +155,7 @@ const chatSlice = createSlice({
               minute: "2-digit",
             }),
           });
-          allMessages.push({
+          historyMessages.push({
             id: `hist-${chat.id}-a`,
             text: chat.bot_response,
             sender: "ai",
@@ -170,7 +170,12 @@ const chatSlice = createSlice({
           });
         });
         
-        state.messages = allMessages;
+        // Merge history with current messages, prioritizing current messages if there's an ID clash
+        // and keeping the chronological order (history first, then session messages)
+        const currentMsgIds = new Set(state.messages.map(m => m.id));
+        const filteredHistory = historyMessages.filter(m => !currentMsgIds.has(m.id));
+        
+        state.messages = [...filteredHistory, ...state.messages];
       })
       .addCase(fetchChatHistory.rejected, (state, action) => {
         state.historyLoading = false;

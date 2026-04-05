@@ -66,8 +66,6 @@ class ChatHistory(db.Model):
     sentiment      = db.Column(db.String(50))
     emotion        = db.Column(db.String(50))
     risk_level     = db.Column(db.String(50))
-    model_metadata = db.Column(db.JSON)  # Stores raw multi-class scores
-    is_hidden      = db.Column(db.Boolean, default=False)
     timestamp      = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

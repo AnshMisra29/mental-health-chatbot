@@ -45,6 +45,28 @@ def get_risk_level(emotion):
     """
     return EMOTION_TO_RISK_LEVEL.get(emotion, "LOW")
 
+def _seed_context_from_db(user_id):
+    """
+    Seeds the in-memory context manager with the user's most recent DB messages.
+    Called once per session (when context is empty) so Sia has conversation memory
+    even after a server restart.
+    """
+    try:
+        recent = (
+            ChatHistory.query
+            .filter_by(user_id=user_id)
+            .order_by(ChatHistory.timestamp.desc())
+            .limit(5)
+            .all()
+        )
+        # recent is DESC, so reverse to get chronological order
+        for chat in reversed(recent):
+            context_manager.add_message(user_id, "user", chat.message)
+            context_manager.add_message(user_id, "assistant", chat.bot_response)
+    except Exception as e:
+        print(f"Context seeding error (non-fatal): {e}")
+
+
 def get_chatbot_response(user_id, message):
     """
     Hybrid response generation:
@@ -58,19 +80,18 @@ def get_chatbot_response(user_id, message):
     except (TypeError, ValueError):
         user_id = None
 
-    # Check if model is ready
-    if not model_loader.is_ready:
-        return {
-            "response": "I'm just finishing my morning coffee (still booting up), but I'm here to listen! How can I help you today?",
-            "emotion": "Normal",
-            "is_crisis": False
-        }
+    # Seed in-memory context from DB on first message of this session
+    # (after a server restart the context_manager is empty — this restores recent turns)
+    if user_id is not None and not context_manager.get_context(user_id):
+        _seed_context_from_db(user_id)
 
-    # 1. Classification
+    # 1. Classification — predictor.load() will block until the model is ready
+    # (no more "morning coffee" fallback; the model loads in ~5s on CPU)
     analysis = predictor.predict(message)
     detected_emotion = analysis['label']
     confidence = analysis['confidence']
     is_crisis = analysis.get('is_crisis', False)
+
     
     # 2. Crisis Handling
     if is_crisis:
@@ -91,8 +112,7 @@ def get_chatbot_response(user_id, message):
                 message=message,
                 bot_response="I hear that you're going through a very difficult time. Please know that you're not alone and there is support available. If you're in immediate danger, please reach out to local emergency services or a crisis helpline like iCall India at 9152987821.",
                 emotion=detected_emotion,
-                risk_level=risk_level,
-                model_metadata=analysis
+                risk_level=risk_level
             )
             db.session.add(chat_record)
             db.session.commit()
@@ -154,8 +174,7 @@ def get_chatbot_response(user_id, message):
                 message=message,
                 bot_response=reply,
                 emotion=detected_emotion,
-                risk_level=risk_level,
-                model_metadata=analysis # Stores raw multi-class confidence scores
+                risk_level=risk_level
             )
             db.session.add(chat_record)
             db.session.commit()

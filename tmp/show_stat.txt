@@ -1,0 +1,32 @@
+﻿commit f24c150445caf9f3cd59a1df03ba0c8b42530009
+Author: AnshMisra29 <anshmisra29@gmail.com>
+Date:   Sun Apr 5 01:36:23 2026 +0530
+
+    feat: interactive footer and navbar modals, remove careers, and sync dashboard stats
+
+ Backend/app.py                          |   4 +-
+ Backend/chatbot/conversation.py         |   2 +
+ Backend/chatbot/routes.py               |  57 +++++-
+ Backend/community/routes.py             |  22 ++-
+ Backend/database/models.py              |  33 ++++
+ Backend/instance/mental_health.db       | Bin 102400 -> 102400 bytes
+ Backend/journal/__init__.py             |   5 +
+ Backend/journal/routes.py               |  85 +++++++++
+ Backend/mood/routes.py                  |  25 ++-
+ Backend/verify_journal_db.py            |  18 ++
+ Frontend/src/components/Footer.jsx      | 232 ++++++++++++++---------
+ Frontend/src/components/Navbar.jsx      | 125 ++++++++++---
+ Frontend/src/features/chat/chatSlice.js | 105 +++++++++--
+ Frontend/src/hooks/useChatHistory.js    |  22 +++
+ Frontend/src/hooks/useCommunity.js      |  48 +++++
+ Frontend/src/hooks/useJournal.js        |  46 +++++
+ Frontend/src/hooks/useMood.js           |  28 +++
+ Frontend/src/hooks/useWeather.js        |  69 +++++++
+ Frontend/src/main.jsx                   |   2 +-
+ Frontend/src/pages/ChatPage.jsx         | 319 ++++++++++++++++++++++++++++----
+ Frontend/src/pages/DashboardPage.jsx    | 275 ++++++++++-----------------
+ Frontend/src/pages/JournalPage.jsx      | 133 ++++++++-----
+ Frontend/src/pages/LandingPage.jsx      |  71 ++-----
+ Frontend/src/pages/MoodLogPage.jsx      | 182 +++++++++---------
+ tmp/migration_script.py                 |  32 ++++
+ 25 files changed, 1405 insertions(+), 535 deletions(-)
